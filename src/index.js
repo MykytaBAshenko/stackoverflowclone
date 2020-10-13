@@ -13,8 +13,8 @@ import { BrowserRouter, Route, Switch, Link } from "react-router-dom"
 // Client Secret jc3oSbdguMBJ7MwimeH8kA((
 // key 6)zESuXpc55o6lZ3o4psDQ((
   Axios.defaults.baseURL = "https://api.stackexchange.com"
-
-
+  // 14464780
+// VhJOwhDs5V3zDbixqZwT7A))
 function Navbar() {
   const [InputSeach, setInputSeach] = useState("")
   const searchOnSite = (e) => {
@@ -64,20 +64,26 @@ function Navbar() {
   )
 
 }
-class Start extends React.Component {
-  constructor() {
-    super();
-    
-    this.state ={
-    }
-  }
-  componentDidMount() {
+function Questions(props) {
+  const [Questions, setQuestions] = useState([])
+  const [SortBy, setSortBy] = useState("activity")
+  const [Page, setPage] = useState(1)
+  const [SortOrder, setSortOrder] = useState("desc")
+  const [HasMore, setHasMore] = useState(false)
+  const [ShowMore, setShowMore] = useState(false)
+  useEffect(() => {
+     Axios.get(`/2.2/questions?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more)
+      setQuestions(data.data.items)
+      console.log(data.data)
+    })
+    Axios.get("/2.2/search?intitle=leaks&site=stackoverflow").then((data) => console.log(data))
+}, [ShowMore])
+
   
-  console.log(Axios.get("/2.2/answers?order=desc&sort=activity&site=stackoverflow"));
-  }
-  render() {
+  
   return (<h1>hi from start</h1>)
-}}
+}
 
 class App extends React.Component{
   constructor() {
@@ -90,7 +96,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://0aac1efb2a6f.ngrok.io/',
+      channelUrl: 'http://4ba25fcc5de6.ngrok.io/',
       complete: function(data) { 
           console.log(data)
       }
@@ -102,7 +108,7 @@ class App extends React.Component{
     <div className="App">
       <Navbar/>
       <Switch>
-        <Route exact path="/" component={Start} />
+        <Route exact path="/" component={Questions} />
       </Switch>
     </div>
   );
