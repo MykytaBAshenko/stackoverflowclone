@@ -15,6 +15,18 @@ import { BrowserRouter, Route, Switch, Link } from "react-router-dom"
   Axios.defaults.baseURL = "https://api.stackexchange.com"
   // 14464780
 // VhJOwhDs5V3zDbixqZwT7A))
+function timeConverter(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp * 1000);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+  return time;
+}
 function Navbar() {
   const [InputSeach, setInputSeach] = useState("")
   const searchOnSite = (e) => {
@@ -71,18 +83,104 @@ function Questions(props) {
   const [SortOrder, setSortOrder] = useState("desc")
   const [HasMore, setHasMore] = useState(false)
   const [ShowMore, setShowMore] = useState(false)
+  let id_for_scroll = "l"+(Questions.length-1);
   useEffect(() => {
-     Axios.get(`/2.2/questions?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
-      setHasMore(data.data.has_more)
-      setQuestions(data.data.items)
-      console.log(data.data)
+    
+     Axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more);
+      setQuestions([...data.data.items]);
+      setPage(1)
+      id_for_scroll = "l"+(Questions.length-1);
     })
-    Axios.get("/2.2/search?intitle=leaks&site=stackoverflow").then((data) => console.log(data))
-}, [ShowMore])
+}, [SortOrder, SortBy])
+  const setMoreQuestions = () => {
+    Axios.get(`/2.2/questions?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more);
+      setQuestions([...Questions,...data.data.items]);
+      setPage(Page+1);
+      id_for_scroll = "l"+(Questions.length-1);
+      console.log(id_for_scroll)
+    })
+  }
+  const getQuestions = (variables) => {
+    Axios.get(`/2.2/questions?page=${variables.Page}&pagesize=50&order=${variables.SortOrder}&sort=${variables.SortBy}&site=stackoverflow`)
 
-  
-  
-  return (<h1>hi from start</h1>)
+  }
+    
+   console.log(id_for_scroll)
+return (<div className="questionsComponent">
+  <div className="questionsControl">
+    <div className="questionsControlOrder">
+      <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+        {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i> }
+      </button>
+    </div> 
+    <div className="questionsControlSortBy">
+      <button className={(SortBy === "activity"?"active":"")} onClick={() => setSortBy("activity")}>
+        activity
+      </button>
+      <button className={(SortBy === "votes"?"active":"")} onClick={() => setSortBy("votes")}>
+        votes
+      </button>
+      <button className={(SortBy === "creation"?"active":"")} onClick={() => setSortBy("creation")}>
+        creation
+      </button>
+    </div>
+  </div>
+  <div className="questionsQuestions">
+  { console.log(Questions) }
+
+    {Questions.map(
+      (Question, Index) => <div id={"l"+Index} className={"QuestionRow "+ (("l"+Index) == id_for_scroll ? "": "under-line")} key={Index}>
+          
+          <div className="QuestionRowActivity">
+            <div className={"QuestionRowActivityVotes "}>
+              <div>
+                <div className="number">{Question.score}</div>
+                <div className="Word">Votes</div>
+              </div>
+            </div>
+            <div className={"QuestionRowActivityAnswers "+((Question.is_answered)?"answered":"")}>
+              <div>
+                <div className="number">{Question.answer_count}</div>
+                <div className="Word">Answers</div>
+              </div>
+            </div>
+            <div className="QuestionRowActivityViews">
+              <div>
+                <div className="number">{Question.view_count}</div>
+                <div className="Word">Views</div>
+              </div>
+            </div>
+          </div>
+          <div className="QuestionRowBody">
+            <div className="QuestionRowBodyTitle" dangerouslySetInnerHTML={{__html:Question.title}}>
+              
+            </div>
+            <ul className="QuestionRowBodyTags">
+              {Question.tags.map((tag, tagIndex) => <li key={Index+tagIndex+Math.random()}>
+              <Link to={"/questions/tagged/"+tag} >{tag}</Link>
+              </li>)
+
+              }
+            </ul>
+            <div className="QuestionRowBodyMetaInfo">
+              <div className="QuestionRowBodyMetaDate">
+                {timeConverter(Question.creation_date)} 
+              </div>
+              <Link to={"/users/"+(Question.owner.user_id)} className="QuestionRowBodyMetaLink">{Question.owner.display_name}</Link>
+              <div className="QuestionRowBodyMetaReputationOfUser">
+                {Question.owner.reputation} 
+              </div>
+            </div>
+        </div>
+        </div>
+    )}
+  </div>
+  <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
+    Load More
+  </a>
+</div>)
 }
 
 class App extends React.Component{
@@ -96,7 +194,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://4ba25fcc5de6.ngrok.io/',
+      channelUrl: 'http://7864ea6b1e6e.ngrok.io',
       complete: function(data) { 
           console.log(data)
       }
@@ -109,6 +207,8 @@ class App extends React.Component{
       <Navbar/>
       <Switch>
         <Route exact path="/" component={Questions} />
+        <Route exact path="/questions" component={Questions} />
+
       </Switch>
     </div>
   );
