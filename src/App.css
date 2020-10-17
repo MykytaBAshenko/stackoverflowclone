@@ -138,6 +138,8 @@ justify-items: center;
 
 .QuestionRowBody{
   display: grid;
+  padding-right: 10px;
+  
 }
 ul.QuestionRowBodyTags{
   list-style: none;
@@ -157,4 +159,11 @@ ul.QuestionRowBodyTags li a{
   text-decoration: none;
   color: black;
   
+}
+.QuestionRowBodyMetaInfo{
+  display: grid;
+  
+  justify-items: end;
+  grid-template-columns:1fr auto auto;
+  column-gap: 10px;
 }

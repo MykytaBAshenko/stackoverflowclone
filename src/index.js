@@ -84,9 +84,11 @@ function Questions(props) {
   const [HasMore, setHasMore] = useState(false)
   const [ShowMore, setShowMore] = useState(false)
   let id_for_scroll = "l"+(Questions.length-1);
+  const tagForSearch =  props.match.params.tag
+
   useEffect(() => {
     
-     Axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+     Axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...data.data.items]);
       setPage(1)
@@ -103,7 +105,7 @@ function Questions(props) {
     })
   }
   const getQuestions = (variables) => {
-    Axios.get(`/2.2/questions?page=${variables.Page}&pagesize=50&order=${variables.SortOrder}&sort=${variables.SortBy}&site=stackoverflow`)
+    Axios.get(`/2.2/questions?page=${variables.Page}&pagesize=50&order=${variables.SortOrder}&sort=${variables.SortBy}&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`)
 
   }
     
@@ -154,9 +156,9 @@ return (<div className="questionsComponent">
             </div>
           </div>
           <div className="QuestionRowBody">
-            <div className="QuestionRowBodyTitle" dangerouslySetInnerHTML={{__html:Question.title}}>
+            <Link to={"/question/"+ Question.question_id} className="QuestionRowBodyTitle" dangerouslySetInnerHTML={{__html:Question.title}}>
               
-            </div>
+            </Link>
             <ul className="QuestionRowBodyTags">
               {Question.tags.map((tag, tagIndex) => <li key={Index+tagIndex+Math.random()}>
               <Link to={"/questions/tagged/"+tag} >{tag}</Link>
@@ -168,7 +170,9 @@ return (<div className="questionsComponent">
               <div className="QuestionRowBodyMetaDate">
                 {timeConverter(Question.creation_date)} 
               </div>
-              <Link to={"/users/"+(Question.owner.user_id)} className="QuestionRowBodyMetaLink">{Question.owner.display_name}</Link>
+              <Link to={"/users/"+(Question.owner.user_id)} className="QuestionRowBodyMetaLink" dangerouslySetInnerHTML={{__html:Question.owner.display_name}}>
+
+              </Link>
               <div className="QuestionRowBodyMetaReputationOfUser">
                 {Question.owner.reputation} 
               </div>
@@ -183,6 +187,11 @@ return (<div className="questionsComponent">
 </div>)
 }
 
+
+function Question(props) {
+
+}
+
 class App extends React.Component{
   constructor() {
     super();
@@ -194,7 +203,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://7864ea6b1e6e.ngrok.io',
+      channelUrl: 'http://e32a1d012dde.ngrok.io',
       complete: function(data) { 
           console.log(data)
       }
@@ -202,12 +211,13 @@ class App extends React.Component{
   }
   render() {
   return (
-    
     <div className="App">
       <Navbar/>
       <Switch>
         <Route exact path="/" component={Questions} />
         <Route exact path="/questions" component={Questions} />
+        <Route exact path="/questions/tagged/:tag" component={Questions} />
+        <Route exact path="/question/:questionId" component={Question} />
 
       </Switch>
     </div>
