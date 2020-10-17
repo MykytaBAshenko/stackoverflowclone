@@ -167,3 +167,52 @@ ul.QuestionRowBodyTags li a{
   grid-template-columns:1fr auto auto;
   column-gap: 10px;
 }
+
+.questionsControlSortBy .active{
+  background-color: lime;
+}
+
+
+
+
+
+
+
+.TagsMap{
+  display: flex;
+  justify-content: center;
+  padding: 0 50px;
+  flex-wrap: wrap;
+  align-items: stretch;
+  height: 100%;
+}
+.TagComponent a{
+  color:rgba(255, 175, 0, 0.65);
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.TagComponent a:hover{
+  color:rgba(255, 175, 0, 1);
+  text-decoration: none;
+}
+.TagComponent{
+
+  width: 330px;
+  grid-template-rows: auto 1fr auto;
+  row-gap: 5px;
+  display: grid;
+  margin:5px;
+  padding: 5px 10px;
+  background:#343a40;
+  border-radius: 4px;
+  color: white;
+}
+.TagComponentWiki{
+  font-size: 14px;
+  height:100%;
+  
+}
+.TagComponentQuestions{
+  text-align: right;
+}

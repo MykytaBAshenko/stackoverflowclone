@@ -45,14 +45,14 @@ function Navbar() {
     <div className="collapse navbar-collapse" id="navbarColor01">
       <ul className="navbar-nav navbar-nav-ul ">
         <li className="nav-item active">
-          <a className="nav-link" href="#">Home</a>
+          <Link className="nav-link" to="/">Questions</Link>
         </li>
       
         <li className="nav-item">
-          <a className="nav-link" href="#">Users</a>
+          <Link className="nav-link" to="/users">Users</Link>
         </li>
         <li className="nav-item">
-          <a className="nav-link" href="#">Tags</a>
+          <Link className="nav-link" to="/tags">Tags</Link>
         </li>
       </ul>
       <form className="form-inline form-search-from-navbar" onSubmit={(e) => searchOnSite(e)}>
@@ -82,7 +82,6 @@ function Questions(props) {
   const [Page, setPage] = useState(1)
   const [SortOrder, setSortOrder] = useState("desc")
   const [HasMore, setHasMore] = useState(false)
-  const [ShowMore, setShowMore] = useState(false)
   let id_for_scroll = "l"+(Questions.length-1);
   const tagForSearch =  props.match.params.tag
 
@@ -161,7 +160,7 @@ return (<div className="questionsComponent">
             </Link>
             <ul className="QuestionRowBodyTags">
               {Question.tags.map((tag, tagIndex) => <li key={Index+tagIndex+Math.random()}>
-              <Link to={"/questions/tagged/"+tag} >{tag}</Link>
+              <Link to={"/questions/tagged/"+tag+"/"} >{tag}</Link>
               </li>)
 
               }
@@ -181,15 +180,102 @@ return (<div className="questionsComponent">
         </div>
     )}
   </div>
+  {HasMore ?
   <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
     Load More
-  </a>
+  </a> : ""
+}
 </div>)
 }
 
 
 function Question(props) {
+  return(<div>
+    gg
+  </div>)
+}
 
+function decodecsharp(str){
+  return str.replace(/#/g,"%23")
+}
+
+function Tag({tag,id}) {
+  const [Wiki, setWiki] = useState(" ");
+  useEffect(() => {
+    Axios.get(decodecsharp(`/2.2/tags/${tag.name}/wikis?site=stackoverflow`)).then((data) => {
+     setWiki(data.data.items[0].excerpt)
+   })
+}, [])
+
+
+  return(<div id={id} className="TagComponent">
+    <Link to={"/questions/tagged/"+tag.name+"/"}>{tag.name}</Link>
+    <div className="TagComponentWiki"  dangerouslySetInnerHTML={{__html:Wiki}}></div>
+    <div className="TagComponentQuestions">Questions: {tag.count}</div>
+  </div>)
+}
+
+function Tags(props) {
+  const [Tags, setTags] = useState([])
+  const [SortBy, setSortBy] = useState("popular")
+  const [Page, setPage] = useState(1)
+  const [SortOrder, setSortOrder] = useState("desc")
+  const [HasMore, setHasMore] = useState(false)
+  let id_for_scroll = "l"+(Tags.length-1);
+  const tagForSearch = props.match.params.tag
+
+  useEffect(() => {
+    
+     Axios.get(`/2.2/tags?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more);
+      setTags([...data.data.items]);
+      setPage(1)
+      id_for_scroll = "l"+(Tags.length-1);
+      console.log(Tags)
+    })
+}, [SortOrder, SortBy])
+  const setMoreQuestions = () => {
+    Axios.get(`/2.2/tags?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more);
+      setTags([...Tags,...data.data.items]);
+      setPage(Page+1);
+      id_for_scroll = "l"+(Tags.length-1);
+    }) 
+  }
+    
+return (<div className="questionsComponent">
+          <div className="questionsControl">
+
+    <div className="questionsControlOrder">
+      <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+        {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i> }
+      </button>
+    </div> 
+    <div className="questionsControlSortBy">
+      <button className={(SortBy === "popular"?"active":"")} onClick={() => setSortBy("popular")}>
+        popular
+      </button>
+      <button className={(SortBy === "activity"?"active":"")} onClick={() => setSortBy("activity")}>
+        activity
+      </button>
+      <button className={(SortBy === "name"?"active":"")} onClick={() => setSortBy("name")}>
+        creation
+      </button>
+    </div>
+    </div>
+
+  {console.log(Tags)}
+  <div className="TagsMap">
+  {
+    Tags.map((tag, index) => <Tag id={"l"+index} tag={tag} key={index}></Tag>)
+  }
+  </div>
+  {HasMore ?
+  <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
+    Load More
+  </a> : ""
+}
+</div>);
 }
 
 class App extends React.Component{
@@ -203,7 +289,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://e32a1d012dde.ngrok.io',
+      channelUrl: 'http://a1895d4930b9.ngrok.io',
       complete: function(data) { 
           console.log(data)
       }
@@ -218,6 +304,8 @@ class App extends React.Component{
         <Route exact path="/questions" component={Questions} />
         <Route exact path="/questions/tagged/:tag" component={Questions} />
         <Route exact path="/question/:questionId" component={Question} />
+        <Route exact path="/tags" component={Tags} />
+
 
       </Switch>
     </div>
