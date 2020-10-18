@@ -296,7 +296,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://e9ee057971e8.ngrok.io',
+      channelUrl: 'http://86b17a88f8ab.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
@@ -321,6 +321,38 @@ class App extends React.Component{
   }
 }
 
+function UserCell(props) {
+  let user = props.user
+  const [favoritTags, setFavoriteTags] = useState([]);
+  
+  useEffect(() => {
+    Axios.get(decodecsharp(`/2.2/users/${user.account_id}/tags?order=desc&sort=popular&site=stackoverflow`)).then((data) => {
+      setFavoriteTags(data.data.items)
+   })
+}, [])
+console.log(favoritTags)
+  return(
+    <div className="UserCell">
+          <div className="UserCellShell">
+            <div className="FirstInfo">
+              <Link to={user.link}>
+                <img src={user.profile_image} alt={user.display_name}/>
+              </Link>
+              <div className="FirstInfoAbout">
+                <Link to={"/users/"+user.user_id}>{user.display_name}</Link>
+                <div className="locationUserCell">{user.location}</div>
+                <div className="reputationUserCell">{user.reputation}</div>
+                <ul className="ulUserCell">
+                  {favoritTags.map((tag, index) => index < 5 && <li key={user.user_id*index+Math.random()+12345}>{tag.name}</li> )}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+  )
+
+}
+
 function Users(props) {
   const [Users, setUsers] = useState([])
   const [SortBy, setSortBy] = useState("reputation")
@@ -328,7 +360,7 @@ function Users(props) {
   const [SortOrder, setSortOrder] = useState("desc")
   const [HasMore, setHasMore] = useState(false)
   let id_for_scroll = "l"+(Users.length-1);
-
+  
   useEffect(() => {
     
      Axios.get(`/2.2/users?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
@@ -370,10 +402,35 @@ function Users(props) {
       </div>
       {console.log(Users)}
       {
+        // about_me: "<p>↵Author of <a href="https://www.manning.com/books/c-sharp-in-depth-fourth-edition?a_aid=jonskeet&a_bid=66d590c3" rel="nofollow noreferrer">C# in Depth</a>.<br>↵Currently a software engineer at Google, London.<br>↵Usually a Microsoft MVP (C#, 2003-2010, 2011-)↵</p>↵↵<p>Sites:</p>↵↵<ul>↵<li><a href="http://csharpindepth.com" rel="nofollow noreferrer">C# in Depth</a>↵<li><a href="http://codeblog.jonskeet.uk" rel="nofollow noreferrer">Coding blog</a>↵<li><a href="http://jonskeet.uk/csharp" rel="nofollow noreferrer">C# articles</a>↵<li><a href="http://twitter.com/jonskeet" rel="nofollow noreferrer">Twitter updates (@jonskeet)</a>↵</ul>↵↵<p>Email: skeet@pobox.com (but please read <a href="https://codeblog.jonskeet.uk/2012/08/22/stack-overflow-and-personal-emails/" rel="nofollow noreferrer">my blog post on Stack Overflow-related emails</a> first)</p>↵"
+        // accept_rate: 86
+        // account_id: 11683
+        // answer_count: 35109
+        // badge_counts: {bronze: 8827, silver: 8569, gold: 775}
+        // creation_date: 1222430705
+        // display_name: "Jon Skeet"
+        // down_vote_count: 7119
+        // is_employee: false
+        // last_access_date: 1603038426
+        // last_modified_date: 1603038300
+        // link: "https://stackoverflow.com/users/22656/jon-skeet"
+        // location: "Reading, United Kingdom"
+        // profile_image: "https://www.gravatar.com/avatar/6d8ebb117e8d83d74ea95fbdd0f87e13?s=128&d=identicon&r=PG"
+        // question_count: 50
+        // reputation: 1214978
+        // reputation_change_day: 215
+        // reputation_change_month: 3785
+        // reputation_change_quarter: 3785
+        // reputation_change_week: 215
+        // reputation_change_year: 60453
+        // up_vote_count: 16650
+        // user_id: 22656
+        // user_type: "registered"
+        // view_count: 1985277
+        // website_url: "http://csharpindepth.com"
         Users.map((user, index) => 
-        <div className="UserCell">
-
-        </div>
+        
+        <UserCell user={user} key={index}/>
         )
 
       }
