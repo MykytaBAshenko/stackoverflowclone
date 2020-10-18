@@ -81,6 +81,7 @@ width: 100%;
 .questionsComponent{
   display: grid;
   justify-items: center;
+  width:100%;
 }
 
 
@@ -108,10 +109,24 @@ width: 100%;
 }
 .QuestionRow{
   display: grid;
-  grid-template-columns: 250px 550px; 
+  max-width: 820px;
+  width: 100%;
+  grid-template-columns: 25fr 55fr; 
   grid-template-areas: "cubes question"
     "about about";
   padding: 10px 0;
+}
+@media screen and (max-width: 820px) {
+  .QuestionRow{
+    padding: 15px 0;
+    grid-template-columns: 1fr;
+    grid-template-areas:"cubes"
+    "question"
+    "about";
+    max-width: 100%;
+    row-gap: 20px;
+
+  }
 }
 .questionsQuestions .QuestionRow.under-line{ 
   border-bottom: 1px solid #343a40;
@@ -129,6 +144,17 @@ width: 100%;
   background-color: #a0a0a059;
   border-radius: 5px;
   grid-area: about;
+  max-width: 100%;
+}
+
+ul{
+  list-style: none;
+}
+.QuestionAbout *{
+  max-width: 88vw;
+}
+.QuestionAbout pre{
+  width:100%;
 }
 .QuestionAbout pre{
   padding: 5px;
@@ -262,7 +288,11 @@ ul.QuestionRowBodyTags li a{
   align-items: stretch;
 }
 
-
+.UserCell{
+  position: relative;
+  max-width: 330px;
+  width:100%;
+}
 .UsersComponent{
   
 }
