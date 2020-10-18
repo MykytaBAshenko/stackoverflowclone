@@ -331,7 +331,7 @@ function Users(props) {
 
   useEffect(() => {
     
-     Axios.get(`/2.2/users?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+     Axios.get(`/2.2/users?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...data.data.items]);
       setPage(1)
@@ -339,7 +339,7 @@ function Users(props) {
     })
 }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/users?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+    Axios.get(`/2.2/users?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...Users,...data.data.items]);
       setPage(Page+1);
@@ -370,7 +370,12 @@ function Users(props) {
       </div>
       {console.log(Users)}
       {
-        // Users.map((user, index) => )
+        Users.map((user, index) => 
+        <div className="UserCell">
+
+        </div>
+        )
+
       }
       {HasMore ?
   <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
