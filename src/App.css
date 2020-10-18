@@ -109,6 +109,8 @@ width: 100%;
 .QuestionRow{
   display: grid;
   grid-template-columns: 250px 550px; 
+  grid-template-areas: "cubes question"
+    "about about";
   padding: 10px 0;
 }
 .questionsQuestions .QuestionRow.under-line{ 
@@ -117,8 +119,34 @@ width: 100%;
 }
 .QuestionRowActivity {
   text-align: center;
+  grid-area: cubes;
   display:grid;
   grid-template-columns: 1fr 1fr 1fr;
+}
+.QuestionAbout{
+  margin: 10px;
+  padding: 10px;
+  background-color: #a0a0a059;
+  border-radius: 5px;
+  grid-area: about;
+}
+.QuestionAbout pre{
+  padding: 5px;
+  background-color: #ffffff67;
+
+}
+
+::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #f7aa06;
+  border-radius: 10px;
+}
+
+.QuestionAbout img{
+  max-width: 100%;
 }
 .QuestionRowActivity > div {
 display: grid;
@@ -138,6 +166,7 @@ justify-items: center;
 
 .QuestionRowBody{
   display: grid;
+  grid-area: "question";
   padding-right: 10px;
   
 }

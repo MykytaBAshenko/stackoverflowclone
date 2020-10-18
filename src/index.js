@@ -44,14 +44,15 @@ function Navbar() {
 
     <div className="collapse navbar-collapse" id="navbarColor01">
       <ul className="navbar-nav navbar-nav-ul ">
-        <li className="nav-item active">
+        <li className={"nav-item" + (window.location.pathname === "/" ? "active" : "")}>
           <Link className="nav-link" to="/">Questions</Link>
         </li>
       
-        <li className="nav-item">
+        <li className={"nav-item" + (window.location.pathname === "/users" ? "active" : "")}>
           <Link className="nav-link" to="/users">Users</Link>
         </li>
-        <li className="nav-item">
+        {console.log(window.location.pathname)}
+        <li className={"nav-item" + (window.location.pathname === "/tags" ? "active" : "")}>
           <Link className="nav-link" to="/tags">Tags</Link>
         </li>
       </ul>
@@ -78,19 +79,8 @@ function Navbar() {
 }
 
 function Question_about(props){
-
-  // const [Wiki, setWiki] = useState(" ");
-  useEffect(() => {
-    Axios({method: 'get', url: `https://api.stackexchange.com/2.2/questions/${props.question.question_id}?order=desc&sort=activity&site=stackoverflow`}).then((data) => {
-    //  setWiki(data.data.items[0].excerpt)
-    console.log(data.data)
-   })
-}, [])
-
-
-
   return(
-    <div>
+    <div className="QuestionAbout" dangerouslySetInnerHTML={{__html:props.question.body}}>
 
     </div>
   )
@@ -107,10 +97,10 @@ function Questions(props) {
   const [HasMore, setHasMore] = useState(false)
   let id_for_scroll = "l"+(Questions.length-1);
   const tagForSearch =  props.match.params.tag
-
+  
   useEffect(() => {
     
-     Axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
+     Axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...data.data.items]);
       setPage(1)
@@ -118,20 +108,14 @@ function Questions(props) {
     })
 }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/questions?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+    Axios.get(`/2.2/questions?page=${Page+1}&pagesize=50&order=${SortOrder}&filter=!9_bDDx5Ia&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...Questions,...data.data.items]);
       setPage(Page+1);
       id_for_scroll = "l"+(Questions.length-1);
-      console.log(id_for_scroll)
     })
   }
-  const getQuestions = (variables) => {
-    Axios.get(`/2.2/questions?page=${variables.Page}&pagesize=50&order=${variables.SortOrder}&sort=${variables.SortBy}&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`)
-
-  }
-    
-   console.log(id_for_scroll)
+  console.log(Questions,"!9_bDDx5Ia")
 return (<div className="questionsComponent">
   <div className="questionsControl">
     <div className="questionsControlOrder">
@@ -152,7 +136,7 @@ return (<div className="questionsComponent">
     </div>
   </div>
   <div className="questionsQuestions">
-  { console.log(Questions) }
+
 
     {Questions.map(
       (Question, Index) => <div onMouseEnter={() => setIsShown(Question.question_id)} onMouseLeave={() => setIsShown(-1)} id={"l"+Index} className={"QuestionRow "+ (("l"+Index) == id_for_scroll ? "": "under-line")} key={Index}>
