@@ -76,11 +76,34 @@ function Navbar() {
   )
 
 }
+
+function Question_about(props){
+
+  // const [Wiki, setWiki] = useState(" ");
+  useEffect(() => {
+    Axios({method: 'get', url: `https://api.stackexchange.com/2.2/questions/${props.question.question_id}?order=desc&sort=activity&site=stackoverflow`}).then((data) => {
+    //  setWiki(data.data.items[0].excerpt)
+    console.log(data.data)
+   })
+}, [])
+
+
+
+  return(
+    <div>
+
+    </div>
+  )
+
+}
+
 function Questions(props) {
   const [Questions, setQuestions] = useState([])
   const [SortBy, setSortBy] = useState("activity")
   const [Page, setPage] = useState(1)
   const [SortOrder, setSortOrder] = useState("desc")
+  const [isShown, setIsShown] = useState(-1)
+
   const [HasMore, setHasMore] = useState(false)
   let id_for_scroll = "l"+(Questions.length-1);
   const tagForSearch =  props.match.params.tag
@@ -132,7 +155,7 @@ return (<div className="questionsComponent">
   { console.log(Questions) }
 
     {Questions.map(
-      (Question, Index) => <div id={"l"+Index} className={"QuestionRow "+ (("l"+Index) == id_for_scroll ? "": "under-line")} key={Index}>
+      (Question, Index) => <div onMouseEnter={() => setIsShown(Question.question_id)} onMouseLeave={() => setIsShown(-1)} id={"l"+Index} className={"QuestionRow "+ (("l"+Index) == id_for_scroll ? "": "under-line")} key={Index}>
           
           <div className="QuestionRowActivity">
             <div className={"QuestionRowActivityVotes "}>
@@ -177,6 +200,10 @@ return (<div className="questionsComponent">
               </div>
             </div>
         </div>
+        {
+          Question.question_id === isShown &&
+          <Question_about question={Question}/>
+        }
         </div>
     )}
   </div>
@@ -289,7 +316,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://a1895d4930b9.ngrok.io',
+      channelUrl: 'http://77dd00870a9e.ngrok.io',
       complete: function(data) { 
           console.log(data)
       }
@@ -305,6 +332,7 @@ class App extends React.Component{
         <Route exact path="/questions/tagged/:tag" component={Questions} />
         <Route exact path="/question/:questionId" component={Question} />
         <Route exact path="/tags" component={Tags} />
+        <Route exact path="/users" component={Users} />
 
 
       </Switch>
@@ -313,6 +341,65 @@ class App extends React.Component{
   }
 }
 
+function Users(props) {
+  const [Users, setUsers] = useState([])
+  const [SortBy, setSortBy] = useState("reputation")
+  const [Page, setPage] = useState(1)
+  const [SortOrder, setSortOrder] = useState("desc")
+  const [HasMore, setHasMore] = useState(false)
+  let id_for_scroll = "l"+(Users.length-1);
+
+  useEffect(() => {
+    
+     Axios.get(`/2.2/users?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more);
+      setUsers([...data.data.items]);
+      setPage(1)
+      id_for_scroll = "l"+(Users.length-1);
+    })
+}, [SortOrder, SortBy])
+  const setMoreQuestions = () => {
+    Axios.get(`/2.2/users?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+      setHasMore(data.data.has_more);
+      setUsers([...Users,...data.data.items]);
+      setPage(Page+1);
+      id_for_scroll = "l"+(Users.length-1);
+    }) 
+  }
+    
+
+  return (
+    <div className="UsersComponent">
+      <div className="questionsControl">
+        <div className="questionsControlOrder">
+          <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+            {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i> }
+          </button>
+        </div> 
+        <div className="questionsControlSortBy">
+          <button className={(SortBy === "reputation"?"active":"")} onClick={() => setSortBy("reputation")}>
+            popular
+          </button>
+          <button className={(SortBy === "creation"?"active":"")} onClick={() => setSortBy("creation")}>
+            activity
+          </button>
+          <button className={(SortBy === "name"?"active":"")} onClick={() => setSortBy("name")}>
+            creation
+          </button>
+        </div>
+      </div>
+      {console.log(Users)}
+      {
+        // Users.map((user, index) => )
+      }
+      {HasMore ?
+  <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
+    Load More
+  </a> : ""
+}
+    </div>
+  )
+}
 function redux (state = {}, action) {
 
   switch (action.type) {
