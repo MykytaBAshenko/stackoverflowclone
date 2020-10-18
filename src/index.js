@@ -333,7 +333,7 @@ function UserCell(props) {
 console.log(favoritTags,user)
   return(
     <div className="UserCell" onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
-          <div className="UserCellShell">
+          <div  className={"UserCellShell " + (IsShown ? "absolute": "")}>
             <div className="FirstInfo">
               <Link to={user.link}>
                 <img src={user.profile_image} alt={user.display_name}/>
@@ -348,8 +348,8 @@ console.log(favoritTags,user)
 
                     </div>
                 }
-                <div className="locationUserCell">{user.location}</div>
-                <div className="reputationUserCell">{user.reputation}</div>
+                <div className="locationUserCell"><i class="fa fa-location"></i> {user.location}</div>
+                <div className="reputationUserCell">Reputation: {user.reputation}</div>
                 <ul className="ulUserCell">
                   {favoritTags.map((tag, index) => index < 5 && <li key={user.user_id*index+Math.random()+12345}>{tag.name}</li> )}
                 </ul>
