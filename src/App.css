@@ -245,3 +245,24 @@ ul.QuestionRowBodyTags li a{
 .TagComponentQuestions{
   text-align: right;
 }
+
+
+
+
+
+
+
+
+
+.UsersMap{
+  display: flex;
+  justify-content: center;
+  padding: 0 50px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+
+.UsersComponent{
+  
+}
