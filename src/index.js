@@ -44,15 +44,14 @@ function Navbar() {
 
     <div className="collapse navbar-collapse" id="navbarColor01">
       <ul className="navbar-nav navbar-nav-ul ">
-        <li className={"nav-item" + (window.location.pathname === "/" ? "active" : "")}>
+        <li className={"nav-item " + (window.location.pathname == "/" ? " active" : "")}>
           <Link className="nav-link" to="/">Questions</Link>
         </li>
       
-        <li className={"nav-item" + (window.location.pathname === "/users" ? "active" : "")}>
+        <li className={"nav-item " + (window.location.pathname == "/users" ? " active" : "")}>
           <Link className="nav-link" to="/users">Users</Link>
         </li>
-        {console.log(window.location.pathname)}
-        <li className={"nav-item" + (window.location.pathname === "/tags" ? "active" : "")}>
+        <li className={"nav-item " + (window.location.pathname == "/tags" ? " active" : "")}>
           <Link className="nav-link" to="/tags">Tags</Link>
         </li>
       </ul>
@@ -115,7 +114,6 @@ function Questions(props) {
       id_for_scroll = "l"+(Questions.length-1);
     })
   }
-  console.log(Questions,"!9_bDDx5Ia")
 return (<div className="questionsComponent">
   <div className="questionsControl">
     <div className="questionsControlOrder">
@@ -242,7 +240,6 @@ function Tags(props) {
       setTags([...data.data.items]);
       setPage(1)
       id_for_scroll = "l"+(Tags.length-1);
-      console.log(Tags)
     })
 }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
@@ -263,19 +260,18 @@ return (<div className="questionsComponent">
       </button>
     </div> 
     <div className="questionsControlSortBy">
-      <button className={(SortBy === "popular"?"active":"")} onClick={() => setSortBy("popular")}>
+      <button className={(SortBy === "popular "?" active":"")} onClick={() => setSortBy("popular")}>
         popular
       </button>
-      <button className={(SortBy === "activity"?"active":"")} onClick={() => setSortBy("activity")}>
+      <button className={(SortBy === "activity "?" active":"")} onClick={() => setSortBy("activity")}>
         activity
       </button>
-      <button className={(SortBy === "name"?"active":"")} onClick={() => setSortBy("name")}>
+      <button className={(SortBy === "name "?" active":"")} onClick={() => setSortBy("name")}>
         creation
       </button>
     </div>
     </div>
 
-  {console.log(Tags)}
   <div className="TagsMap">
   {
     Tags.map((tag, index) => <Tag id={"l"+index} tag={tag} key={index}></Tag>)
@@ -300,9 +296,9 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://77dd00870a9e.ngrok.io',
+      channelUrl: 'http://e9ee057971e8.ngrok.io',
       complete: function(data) { 
-          console.log(data)
+          // console.log(data)
       }
   })
   }
