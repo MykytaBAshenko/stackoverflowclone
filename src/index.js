@@ -330,7 +330,7 @@ function UserCell(props) {
       setFavoriteTags(data.data.items)
    })
 }, [])
-console.log(favoritTags,user)
+
   return(
     <div className={"UserCell " + (IsShown ? "MoreGrey" : "")} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
           <div  className={"UserCellShell "}>
