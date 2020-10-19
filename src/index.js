@@ -296,7 +296,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://86b17a88f8ab.ngrok.io',
+      channelUrl: 'http://5bdf01aefb7d.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
@@ -332,33 +332,33 @@ function UserCell(props) {
 }, [])
 console.log(favoritTags,user)
   return(
-    <div className="UserCell" onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
-          <div  className={"UserCellShell " + (IsShown ? "absolute": "")}>
+    <div className={"UserCell " + (IsShown ? "MoreGrey" : "")} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
+          <div  className={"UserCellShell "}>
             <div className="FirstInfo">
               <Link to={user.link}>
                 <img src={user.profile_image} alt={user.display_name}/>
               </Link>
               <div className="FirstInfoAbout">
-                <Link to={"/users/"+user.user_id}>{user.display_name}</Link>
-                {
-                  IsShown && <div className="Badges">
-                      <div className="gold"> {user.badge_counts.gold}</div>
-                      <div className="silver"> {user.badge_counts.silver}</div>
-                      <div className="bronze"> {user.badge_counts.bronze}</div>
-
-                    </div>
-                }
-                <div className="locationUserCell"><i class="fa fa-location"></i> {user.location}</div>
+                <Link to={"/users/"+user.user_id} dangerouslySetInnerHTML={{__html:user.display_name}}></Link>
+                <div className="locationUserCell" dangerouslySetInnerHTML={{__html:`<i class="fa fa-location"></i> ${user.location}`}}></div>
                 <div className="reputationUserCell">Reputation: {user.reputation}</div>
                 <ul className="ulUserCell">
                   {favoritTags.map((tag, index) => index < 5 && <li key={user.user_id*index+Math.random()+12345}>{tag.name}</li> )}
                 </ul>
               </div>
             </div>{
-            IsShown && 
-            <div className="AboutUserCell" dangerouslySetInnerHTML={{__html:user.about_me}} >
+            IsShown && <div className=" absolutePosition">
+            <div className="Badges">
+                      <div className="gold"> {user.badge_counts.gold}</div>
+                      <div className="silver"> {user.badge_counts.silver}</div>
+                      <div className="bronze"> {user.badge_counts.bronze}</div>
+
+                    </div>
+            <div className={"AboutUserCell"} dangerouslySetInnerHTML={{__html:user.about_me}} >
               
-            </div>}
+            </div>
+            </div>
+            }
           </div>
         </div>
   )
