@@ -27,11 +27,29 @@ function timeConverter(UNIX_timestamp){
   var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
   return time;
 }
+
+function auth() {
+  return
+
+}
+
 function Navbar() {
   const [InputSeach, setInputSeach] = useState("")
+  const [token, settoken] = useState(null)
   const searchOnSite = (e) => {
     e.preventDefault();
     console.log(InputSeach)
+  }
+  const do_login=() => {
+    window.SE.authenticate({
+      success: function(data) { 
+        settoken(data.accessToken)
+      },
+      error: function(data) { 
+          alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage); 
+      },
+      networkUsers: true
+  })
   }
   return (
   <header >
@@ -60,12 +78,13 @@ function Navbar() {
         <button className="btn btn-warning  my-2 my-sm-0" type="submit">Search</button>
       </form>
       <div>
-        { 0 ?
-      <Link className="login" to="/">Login</Link>
-      : 
+        { token ?
       <Link className="navbar-avatar" to="/">
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcT3xHmzcFHcJOB5TFKxk4RNHFwc8nF0HQZwhw&usqp=CAU" />
       </Link>
+      : 
+      <Link onClick={() =>  do_login()} className="login" to="/">Login</Link>
+          
 
         }
       </div>
