@@ -5,9 +5,10 @@ import * as serviceWorker from './serviceWorker';
 import './App.css';
 import Axios from 'axios'
 import { Provider, useSelector, useDispatch } from 'react-redux';
-import { createStore, applyMiddleware, combineReducers  } from 'redux';
+import { createStore, applyMiddleware, combineReducers, compose  } from 'redux';
 import promiseMiddleware from 'redux-promise';
-import ReduxThunk from 'redux-thunk';
+import thunk from 'redux-thunk';
+import Cookie from 'js-cookie';
 import { BrowserRouter, Route, Switch, Link } from "react-router-dom"
 // Id 18924
 // Client Secret jc3oSbdguMBJ7MwimeH8kA((
@@ -28,73 +29,7 @@ function timeConverter(UNIX_timestamp){
   return time;
 }
 
-function auth() {
-  return
 
-}
-
-function Navbar() {
-  const [InputSeach, setInputSeach] = useState("")
-  const [token, settoken] = useState(null)
-  const searchOnSite = (e) => {
-    e.preventDefault();
-    console.log(InputSeach)
-  }
-  const do_login=() => {
-    window.SE.authenticate({
-      success: function(data) { 
-        settoken(data.accessToken)
-      },
-      error: function(data) { 
-          alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage); 
-      },
-      networkUsers: true
-  })
-  }
-  return (
-  <header >
-    
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-    <Link to="/" className="navbar-brand" >StackOverfowClone</Link>
-    <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-      <span className="navbar-toggler-icon"></span>
-    </button>
-
-    <div className="collapse navbar-collapse" id="navbarColor01">
-      <ul className="navbar-nav navbar-nav-ul ">
-        <li className={"nav-item " + (window.location.pathname == "/" ? " active" : "")}>
-          <Link className="nav-link" to="/">Questions</Link>
-        </li>
-      
-        <li className={"nav-item " + (window.location.pathname == "/users" ? " active" : "")}>
-          <Link className="nav-link" to="/users">Users</Link>
-        </li>
-        <li className={"nav-item " + (window.location.pathname == "/tags" ? " active" : "")}>
-          <Link className="nav-link" to="/tags">Tags</Link>
-        </li>
-      </ul>
-      <form className="form-inline form-search-from-navbar" onSubmit={(e) => searchOnSite(e)}>
-        <input value={InputSeach} onChange={(e) => setInputSeach(e.target.value)} className="navbar-header-input form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"/>
-        <button className="btn btn-warning  my-2 my-sm-0" type="submit">Search</button>
-      </form>
-      <div>
-        { token ?
-      <Link className="navbar-avatar" to="/">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcT3xHmzcFHcJOB5TFKxk4RNHFwc8nF0HQZwhw&usqp=CAU" />
-      </Link>
-      : 
-      <Link onClick={() =>  do_login()} className="login" to="/">Login</Link>
-          
-
-        }
-      </div>
-    </div>
-  </nav>
-  </header>
-  
-  )
-
-}
 
 function Question_about(props){
   return(
@@ -297,11 +232,19 @@ return (<div className="questionsComponent">
   }
   </div>
   {HasMore ?
-  <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
+  <a href={"#"+id_for_scroll} onClick={() => setMoreQuestions()} className="btn btn-primary LoadMoreBtn">
     Load More
   </a> : ""
 }
 </div>);
+}
+const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
+
+
+function User(props){
+  return(<div>
+    User
+  </div>)
 }
 
 class App extends React.Component{
@@ -315,7 +258,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://5bdf01aefb7d.ngrok.io',
+      channelUrl: 'http://3480519247a4.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
@@ -332,8 +275,10 @@ class App extends React.Component{
         <Route exact path="/question/:questionId" component={Question} />
         <Route exact path="/tags" component={Tags} />
         <Route exact path="/users" component={Users} />
+        <Route exact path="/users/:id" component={User} />
+        
 
-
+ 
       </Switch>
     </div>
   );
@@ -449,28 +394,123 @@ function Users(props) {
     </div>
   )
 }
-function redux (state = {}, action) {
 
+const reducer = combineReducers({
+  userSignin: userSigninReducer,
+})
+function userSigninReducer(state = {}, action) {
   switch (action.type) {
-      
-      default:
-          return state;
+
+    case "USER_SIGNIN_SUCCESS":
+      return { userInfo: action.payload };
+    case "USER_EXIT":
+        return { userInfo: false };
+    default: return state;
   }
 }
 
 
-const rootReducer = combineReducers({
-  redux
-});
-const createStoreWithMiddleware = applyMiddleware(promiseMiddleware, ReduxThunk)(createStore);
+
+
+
+ 
+
+
+function Navbar() {
+  const [InputSeach, setInputSeach] = useState("")
+  const userSignin = useSelector(state => state.userSignin);
+  const userInfo = userSignin;
+  const [userAccount, setuserAccount] = useState([])
+const dispatch = useDispatch();
+  
+  const searchOnSite = (e) => {
+    e.preventDefault();
+    console.log(InputSeach)
+  }
+
+  useEffect(() => {
+    if(userInfo.userInfo)
+    Axios.get("/2.2/me?order=desc&sort=reputation&site=stackoverflow&filter=!--1nZv)deGu1&key="+app_key+"&access_token="+userInfo.userInfo)
+    .then(function (response) {
+      setuserAccount(response.data.items[0])
+      console.log(response.data.items[0])
+    })
+}, [userInfo])
+
+  const do_login=() => {
+    window.SE.authenticate({
+      success: function(data) { 
+        dispatch({ type: "USER_SIGNIN_SUCCESS", payload: data.accessToken });
+        Cookie.set('userToken', JSON.stringify(data.accessToken));
+      },
+      error: function(data) { 
+          alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage); 
+      },
+      networkUsers: true
+  })
+  }
+  const do_logout =() => {
+    dispatch({type: "USER_EXIT"})
+    Cookie.remove('userToken');
+  }
+  return (
+  <header >
+    
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <Link to="/" className="navbar-brand" >StackOverfowClone</Link>
+    <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+      <span className="navbar-toggler-icon"></span>
+    </button>
+
+    <div className="collapse navbar-collapse" id="navbarColor01">
+      <ul className="navbar-nav navbar-nav-ul ">
+        <li className={"nav-item " + (window.location.pathname == "/" ? " active" : "")}>
+          <Link className="nav-link" to="/">Questions</Link>
+        </li>
+      
+        <li className={"nav-item " + (window.location.pathname == "/users" ? " active" : "")}>
+          <Link className="nav-link" to="/users">Users</Link>
+        </li>
+        <li className={"nav-item " + (window.location.pathname == "/tags" ? " active" : "")}>
+          <Link className="nav-link" to="/tags">Tags</Link>
+        </li>
+      </ul>
+      <form className="form-inline form-search-from-navbar" onSubmit={(e) => searchOnSite(e)}>
+        <input value={InputSeach} onChange={(e) => setInputSeach(e.target.value)} className="navbar-header-input form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"/>
+        <button className="btn btn-warning  my-2 my-sm-0" type="submit">Search</button>
+      </form>
+      <div>
+        { userInfo.userInfo ?
+      <div className="userAccountControl">
+      <Link className="navbar-avatar" to={"/users/"+userAccount.account_id}>
+        <img src={userAccount.profile_image} />
+      </Link>
+      <button onClick={() =>  do_logout()} className="btn btn-danger">Log out</button>
+
+      </div>
+      : 
+      <button onClick={() =>  do_login()} className="login btn btn-primary" to="/">Login</button>
+          
+
+        }
+      </div>
+    </div>
+  </nav>
+  </header>
+  
+  )
+
+}
+
+const userInfo = Cookie.getJSON("userToken") || null;
+console.log(userInfo)
+const initialState = {userSignin: { userInfo }};
+
+const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 ReactDOM.render(
   <Provider
-      store={createStoreWithMiddleware(
-          rootReducer,
-          window.__REDUX_DEVTOOLS_EXTENSION__ &&
-          window.__REDUX_DEVTOOLS_EXTENSION__()
-      )}
+      store={ createStore(reducer, initialState, composeEnhancer(applyMiddleware(thunk)))}
   >
   <React.StrictMode>
     <BrowserRouter>

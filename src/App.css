@@ -8,9 +8,21 @@
   display: grid;
   grid-template-columns: 1fr auto;
   column-gap: 10px;
+  margin-right: 10px;
 width: 100%;
 
 }
+
+.userAccountControl{
+  display: grid;
+  column-gap: 10px;
+
+  grid-template-columns: auto auto;
+}
+.userAccountControl .btn-danger{
+  width: 81px;
+}
+
 .form-inline  .navbar-header-input{
 width: 100%;
 }
@@ -45,7 +57,6 @@ width: 100%;
   justify-items: center;
   width: 40px;
   border-radius: 4px;
-  margin-left: 10px;
   background-color: #495057;
   height: 40px;
 }
@@ -58,6 +69,7 @@ width: 100%;
   border-radius: 4px;
 
 }
+
 .navbar-nav-ul{
   margin-right: 10px;
 
