@@ -184,18 +184,20 @@ function Tags(props) {
   const [Page, setPage] = useState(1)
   const [SortOrder, setSortOrder] = useState("desc")
   const [HasMore, setHasMore] = useState(false)
+  const [TagSearch, setTagSearch] = useState("")
+
   let id_for_scroll = "l"+(Tags.length-1);
   const tagForSearch = props.match.params.tag
 
   useEffect(() => {
     
-     Axios.get(`/2.2/tags?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+     Axios.get(`/2.2/tags?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...data.data.items]);
       setPage(1)
       id_for_scroll = "l"+(Tags.length-1);
     })
-}, [SortOrder, SortBy])
+}, [SortOrder, SortBy,TagSearch])
   const setMoreQuestions = () => {
     Axios.get(`/2.2/tags?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
@@ -207,7 +209,7 @@ function Tags(props) {
     
 return (<div className="questionsComponent">
           <div className="questionsControl">
-
+  <input value={TagSearch} onChange={(e)=> setTagSearch(e.target.value)}></input>
     <div className="questionsControlOrder">
       <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
         {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i> }
@@ -241,10 +243,83 @@ return (<div className="questionsComponent">
 const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 
 
+function UserPagePostsComponent(props) {
+  const [Posts, setPosts] = useState([])
+  const [Page, setPage] = useState(1);
+  const [PostsType, setPostsType] = useState("posts");
+  const [PostsSort, setPostsSort] = useState("votes");
+  const [HasMore, setHasMore] = useState(false);
+  const user_id = props.User.user_id
+  console.log(user_id, 1)
+  useEffect(() => {
+    
+    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow`).then((data) => {
+     setHasMore(data.data.has_more);
+     setPosts([...data.data.items]);
+     console.log(data.data,1)
+     setPage(1)
+   })
+}, [PostsType, PostsType])
+const setPagePost = (page) => {
+  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!b6AubCg.JGWgVj`).then((data) => {
+    setHasMore(data.data.has_more);
+    setPosts([...data.data.items]);
+    setPage(page);
+  }) 
+}
+  
+  return(
+    <div className="PostsComponent">
+      <div className="PostsFilters">
+        <div className="PostsFiltersType">
+          <button onClick={() => setPostsType("posts")}>
+            All
+          </button >
+          <button onClick={() => setPostsType("questions")}>
+            Questions
+          </button>
+          <button onClick={() => setPostsType("answers")}>
+            Answers
+          </button>
+        </div>
+        <div className="PostsFiltersSort">
+          <button onClick={() => setPostsSort("votes")}>
+            Votes
+          </button>
+          <button  onClick={() => setPostsSort("creation")}>
+            Newest
+          </button>
+        </div>
+      </div>
+      <div className="UserPostsExact">
+        {console.log(Posts)}
+      </div>
+      {Page === 1 && HasMore &&
+      <div className="UserPostsPageControl">
+        {Page > 1 &&
+        <button onClick={() => setPagePost(Page - 1)}>
+          -1
+        </button>
+        }
+        <div>
+          {Page}
+        </div>
+        <button onClick={() => setPagePost(Page + 1)}>
+          1
+        </button>
+      </div>
+}
+    </div>
+
+  )
+}
+
 function User(props){
   const [User, setUser] = useState([]);
   const idForSearch =  props.match.params.id
   const [Tags, setTags] = useState([]);
+  const [PostType, setPostType] = useState("posts");
+
   useEffect(() => {
     console.log(idForSearch)
     
@@ -260,8 +335,6 @@ function User(props){
 }, [])
   return(<div className="userPage">
     {console.log(User)}
-    {
-    User != [] ?
     <div className="userPageShell">
       <div className="userPageHeader">
         <div className="userPageImage">
@@ -287,10 +360,11 @@ function User(props){
           <span className="userPageTagCount">{tag.count}</span>
         </li>)}
       </ul>
-    </div>:
-    <div className="loading">Loading</div>
+      <div className="userPagePosts">
+        <UserPagePostsComponent  User={User}/>
+      </div>
+    </div>
 
-}
   </div>)
 }
 
