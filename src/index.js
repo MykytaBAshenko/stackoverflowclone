@@ -242,6 +242,18 @@ const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 
 
 function User(props){
+  const [User, setUser] = useState([]);
+  const idForSearch =  props.match.params.id
+
+  useEffect(() => {
+    
+    Axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!3zl2.7RwKvwK2p-bY`).then((data) => {
+    console.log("baseInfo",data.data.items[0])//baseInfo
+   })
+   Axios.get(`/2.2/users/${idForSearch}/tags?order=desc&sort=name&site=stackoverflow&filter=!--1nZvEMjtxf`).then((data) => {
+    console.log(data.data.items[0])//tags
+   })
+}, [])
   return(<div>
     User
   </div>)
@@ -258,7 +270,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://3480519247a4.ngrok.io',
+      channelUrl: 'http://bba6e6947094.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
