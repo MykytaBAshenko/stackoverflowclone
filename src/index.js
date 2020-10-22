@@ -244,18 +244,53 @@ const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 function User(props){
   const [User, setUser] = useState([]);
   const idForSearch =  props.match.params.id
-
+  const [Tags, setTags] = useState([]);
   useEffect(() => {
+    console.log(idForSearch)
     
     Axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!3zl2.7RwKvwK2p-bY`).then((data) => {
-    console.log("baseInfo",data.data.items[0])//baseInfo
+    setUser(data.data.items[0])
+    console.log(data.data.items[0])
+
    })
-   Axios.get(`/2.2/users/${idForSearch}/tags?order=desc&sort=name&site=stackoverflow&filter=!--1nZvEMjtxf`).then((data) => {
-    console.log(data.data.items[0])//tags
+   Axios.get(`/2.2/users/${idForSearch}/tags?order=desc&sort=popular&site=stackoverflow`).then((data) => {
+    console.log(data.data.items)//tags
+    setTags(data.data.items)
    })
 }, [])
-  return(<div>
-    User
+  return(<div className="userPage">
+    {console.log(User)}
+    {
+    User != [] ?
+    <div className="userPageShell">
+      <div className="userPageHeader">
+        <div className="userPageImage">
+          <img src={User.profile_image}></img>
+          <div>Reputation: {User.reputation}</div>
+          <div className="Badges">
+            <div className="gold"> {User?.badge_counts?.gold}</div>
+            <div className="silver"> {User?.badge_counts?.silver}</div>
+            <div className="bronze"> {User?.badge_counts?.bronze}</div>
+          </div>
+        </div>
+        <div className="userPageAbout">
+          <h1 className="userPageName" dangerouslySetInnerHTML={{__html:User.display_name}}></h1>
+          <div className="userPageLastTime" dangerouslySetInnerHTML={{__html:`Last time active ${timeConverter(User.last_access_date)}`}}></div>
+          <div className="userPageLocation" dangerouslySetInnerHTML={{__html:`<i class="fa fa-location"></i> ${User.location}`}}></div>
+          <div className="userPageAbout" dangerouslySetInnerHTML={{__html: User.about_me}}> 
+          </div>
+        </div>    
+      </div>
+      <ul className="Tags">
+        {Tags.map((tag, index) => <li key={index+""+tag.count}>
+          <span className="userPageTagName">{tag.name}</span>
+          <span className="userPageTagCount">{tag.count}</span>
+        </li>)}
+      </ul>
+    </div>:
+    <div className="loading">Loading</div>
+
+}
   </div>)
 }
 
@@ -270,7 +305,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://bba6e6947094.ngrok.io',
+      channelUrl: 'http://8032392f6ed5.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
@@ -302,8 +337,9 @@ function UserCell(props) {
   const [favoritTags, setFavoriteTags] = useState([]);
   const [IsShown, setIsShown] = useState(false)
   useEffect(() => {
-    Axios.get(decodecsharp(`/2.2/users/${user.account_id}/tags?order=desc&sort=popular&site=stackoverflow`)).then((data) => {
+    Axios.get(decodecsharp(`/2.2/users/${user.user_id}/tags?order=desc&sort=popular&site=stackoverflow`)).then((data) => {
       setFavoriteTags(data.data.items)
+      console.log(data.data.items)
    })
 }, [])
 
@@ -311,7 +347,7 @@ function UserCell(props) {
     <div className={"UserCell " + (IsShown ? "MoreGrey" : "")} onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
           <div  className={"UserCellShell "}>
             <div className="FirstInfo">
-              <Link to={user.link}>
+              <Link to={"/users/"+user.user_id}>
                 <img src={user.profile_image} alt={user.display_name}/>
               </Link>
               <div className="FirstInfoAbout">
@@ -388,7 +424,6 @@ function Users(props) {
           </button>
         </div>
       </div>
-      {console.log(Users)}
       <div className="UsersMap">
       {
         Users.map((user, index) => 
