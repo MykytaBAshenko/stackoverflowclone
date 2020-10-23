@@ -246,29 +246,35 @@ const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 function UserPagePostsComponent(props) {
   const [Posts, setPosts] = useState([])
   const [Page, setPage] = useState(1);
+  const [isHaveAnyPosts, setisHaveAnyPosts] = useState(false)
   const [PostsType, setPostsType] = useState("posts");
   const [PostsSort, setPostsSort] = useState("votes");
   const [HasMore, setHasMore] = useState(false);
   const user_id = props.User.user_id
-  console.log(user_id, 1)
   useEffect(() => {
-    
+    user_id &&
     Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow`).then((data) => {
-     setHasMore(data.data.has_more);
-     setPosts([...data.data.items]);
-     console.log(data.data,1)
-     setPage(1)
-   })
-}, [PostsType, PostsType])
-const setPagePost = (page) => {
-  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!b6AubCg.JGWgVj`).then((data) => {
     setHasMore(data.data.has_more);
+    if(data.data.items.length) 
+      setisHaveAnyPosts(true)
     setPosts([...data.data.items]);
+    setPage(1)
+   })
+}, [PostsType, PostsType, user_id])
+
+
+const setPagePost = (page) => {
+  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow`).then((data) => {
     setPage(page);
+    setPosts([...data.data.items]);
+    setHasMore(data.data.has_more);
+
+    console.log(data.data,1,page)
   }) 
 }
   
   return(
+     isHaveAnyPosts &&
     <div className="PostsComponent">
       <div className="PostsFilters">
         <div className="PostsFiltersType">
@@ -294,7 +300,7 @@ const setPagePost = (page) => {
       <div className="UserPostsExact">
         {console.log(Posts)}
       </div>
-      {Page === 1 && HasMore &&
+      {(Page == 1 && HasMore)  &&
       <div className="UserPostsPageControl">
         {Page > 1 &&
         <button onClick={() => setPagePost(Page - 1)}>
@@ -304,13 +310,14 @@ const setPagePost = (page) => {
         <div>
           {Page}
         </div>
+        {HasMore &&
         <button onClick={() => setPagePost(Page + 1)}>
           1
         </button>
+        }
       </div>
 }
     </div>
-
   )
 }
 
@@ -332,7 +339,7 @@ function User(props){
     console.log(data.data.items)//tags
     setTags(data.data.items)
    })
-}, [])
+}, [window.location.href])
   return(<div className="userPage">
     {console.log(User)}
     <div className="userPageShell">
@@ -379,7 +386,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://8032392f6ed5.ngrok.io',
+      channelUrl: 'http://c56fff50569b.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
@@ -537,7 +544,7 @@ function userSigninReducer(state = {}, action) {
  
 
 
-function Navbar() {
+function Navbar(props) {
   const [InputSeach, setInputSeach] = useState("")
   const userSignin = useSelector(state => state.userSignin);
   const userInfo = userSignin;
@@ -601,9 +608,9 @@ const dispatch = useDispatch();
         <button className="btn btn-warning  my-2 my-sm-0" type="submit">Search</button>
       </form>
       <div>
-        { userInfo.userInfo ?
+        { userInfo.userInfo && userAccount !== [] ?
       <div className="userAccountControl">
-      <Link className="navbar-avatar" to={"/users/"+userAccount.account_id}>
+      <Link className="navbar-avatar" to={"/users/"+userAccount.user_id}>
         <img src={userAccount.profile_image} />
       </Link>
       <button onClick={() =>  do_logout()} className="btn btn-danger">Log out</button>
