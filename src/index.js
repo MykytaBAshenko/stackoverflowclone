@@ -403,7 +403,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://9377a15ba52a.ngrok.io',
+      channelUrl: 'http://1de3e9a3ee4b.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }

@@ -409,8 +409,19 @@ ul.QuestionRowBodyTags li a{
 .gold::before{
   background-color: gold;
 }
-
+.absolutePosition{
+  max-width: 100%;
+}
   .AboutUserCell{
     padding: 5px;
     font-size: 12.5px;
+    max-width: 100%;
+
+  }
+  .AboutUserCell *{
+    max-width: 100%;
+  }
+
+  .AboutUserCell * {
+
   }
