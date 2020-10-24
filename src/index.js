@@ -243,25 +243,34 @@ return (<div className="questionsComponent">
 const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 
 function PostComponent(props) {
+  const thisGavno = props?.Post;
   const [Post, setPost] = useState([])
   useEffect(() => {
-    if (props?.Post?.post_type === "answer" || props.type === "answers"){
-      Axios.get(`/2.2/answers/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZx.Tkxh*`).then((data) => {
-        setPost(data?.data?.items[0])
-        console.log(data?.data?.items[0])
-      })
-    }
-    if (props?.Post?.post_type === "question"  || props.type === "questions"){
-      Axios.get(`/2.2/questions/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
+    console.log(thisGavno)
+    if ((thisGavno?.post_type === "answer" && props.type==="posts") || props.type === "answers"){
+      Axios.get(`/2.2/answers/${(thisGavno?.answer_id ? thisGavno?.answer_id : thisGavno?.post_id ) }?order=desc&sort=activity&site=stackoverflow&filter=!--1nZx.Tkxh*`).then((data) => {
         setPost(data?.data?.items[0])
       })
+    }else
+    if ((thisGavno?.post_type === "question"&& props.type==="posts")  || props.type === "questions"){
+      Axios.get(`/2.2/questions/${thisGavno?.question_id ? thisGavno?.question_id : thisGavno?.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
+        setPost(data?.data?.items[0])
+      })
     }
-}, [])
+    else
+    if (props.type === "favorites"){
+      Axios.get(`/2.2/questions/${thisGavno?.question_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
+        setPost(data?.data?.items[0])
+      })
+    }
+    
+    
+}, [thisGavno])
   return(<div className="PostFromUserPage">
-    <div className="PostFromUserPageType">{(props?.Post?.post_type) ? props?.Post?.post_type[0] : props.type[0]}</div>
-    <div className={"PostFromUserPageScore " + ((Post?.is_accepted) ? "accepted" : "") }>{props?.Post?.score}</div>
-    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id +"#answer-"+ (Post?.answer_id)}>{Post?.title}</Link>
-    <div className="PostFromUserDate">{ timeConverter(props?.Post?.creation_date)}</div>
+    <div className="PostFromUserPageType">{(thisGavno?.post_type) ? thisGavno?.post_type[0] : props.type[0]}</div>
+    <div className={"PostFromUserPageScore " + ((Post?.is_accepted) ? "accepted" : "") }>{thisGavno?.score}</div>
+    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id +((thisGavno?.post_type === "answer" || props.type === "answers") ? "#answer-"+ (Post?.answer_id) : "")}>{Post.title}</Link>
+    <div className="PostFromUserDate">{ timeConverter(thisGavno?.creation_date)}</div>
   </div>)
 }
 
@@ -275,7 +284,7 @@ function UserPagePostsComponent(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=4&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
     setHasMore(data.data.has_more);
     setPosts([...data.data.items]);
     setPage(1)
@@ -284,7 +293,7 @@ function UserPagePostsComponent(props) {
 
 
 const setPagePost = (page) => {
-  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=4&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
     setPage(page);
     setPosts([...data.data.items]);
     setHasMore(data.data.has_more);
@@ -297,7 +306,7 @@ const setPagePost = (page) => {
       <div className="PostsFilters">
         <div className="PostsFiltersType">
           <button onClick={() => setPostsType("posts")}>
-            All
+            Q&A
           </button >
           <button onClick={() => setPostsType("questions")}>
             Questions
@@ -305,6 +314,10 @@ const setPagePost = (page) => {
           <button onClick={() => setPostsType("answers")}>
             Answers
           </button>
+          <button onClick={() => setPostsType("favorites")}>
+          favorites
+          </button>
+          
         </div>
         <div className="PostsFiltersSort">
           <button onClick={() => setPostsSort("votes")}>
@@ -313,6 +326,7 @@ const setPagePost = (page) => {
           <button  onClick={() => setPostsSort("creation")}>
             Newest
           </button>
+          
         </div>
       </div>
       <div className="UserPostsExact">
@@ -346,15 +360,13 @@ function UserPageComments(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-    Axios.get(`/2.2/users/${user_id}/comments?order=desc&page=${Page}&sort=creation&site=stackoverflow&filter=!--1nZxT0.tIV`).then(data => {
+    Axios.get(`/2.2/users/${user_id}/comments?order=desc&pagesize=4&page=${Page}&sort=creation&site=stackoverflow&filter=!--1nZxT0.tIV`).then(data => {
       setComments(data.data.items)
       setHasMore(data.data.has_more);
-      console.log(data.data)
     })
   },[Page,user_id])
   return (
     <div className="UserPageCommentsMap">
-      {console.log(Comments)}
       <div className="UserPageCommentsMapExact">
       {Comments.map((comment, index) => <div className="UserPageComment" key={index*Math.random()}>
         <Link to={`/questions/`+comment.post_id+"#comment-"+comment.comment_id} dangerouslySetInnerHTML={{__html:comment.body}}></Link>
