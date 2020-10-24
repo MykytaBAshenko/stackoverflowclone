@@ -248,6 +248,7 @@ function PostComponent(props) {
     if (props?.Post?.post_type === "answer" || props.type === "answers"){
       Axios.get(`/2.2/answers/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZx.Tkxh*`).then((data) => {
         setPost(data?.data?.items[0])
+        console.log(data?.data?.items[0])
       })
     }
     if (props?.Post?.post_type === "question"  || props.type === "questions"){
@@ -259,7 +260,7 @@ function PostComponent(props) {
   return(<div className="PostFromUserPage">
     <div className="PostFromUserPageType">{(props?.Post?.post_type) ? props?.Post?.post_type[0] : props.type[0]}</div>
     <div className={"PostFromUserPageScore " + ((Post?.is_accepted) ? "accepted" : "") }>{props?.Post?.score}</div>
-    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id}>{Post?.title}</Link>
+    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id +"#answer-"+ (Post?.answer_id)}>{Post?.title}</Link>
     <div className="PostFromUserDate">{ timeConverter(props?.Post?.creation_date)}</div>
   </div>)
 }
@@ -338,6 +339,37 @@ const setPagePost = (page) => {
   )
 }
 
+function UserPageComments(props) {
+  const [Comments, setComments] = useState([])
+  const [Page, setPage] = useState(1)
+  const [HasMore, setHasMore] = useState(false)
+  const user_id = props.User.user_id
+  useEffect(() => {
+    user_id &&
+    Axios.get(`/2.2/users/${user_id}/comments?order=desc&page=${Page}&sort=creation&site=stackoverflow&filter=!--1nZxT0.tIV`).then(data => {
+      setComments(data.data.items)
+      setHasMore(data.data.has_more);
+      console.log(data.data)
+    })
+  },[Page,user_id])
+  return (
+    <div className="UserPageCommentsMap">
+      {console.log(Comments)}
+      <div className="UserPageCommentsMapExact">
+      {Comments.map((comment, index) => <div key={index*Math.random()}>
+      </div>)}
+      </div>
+      <div className="UserPageCommentsControl">{
+        Page > 1&&
+      <button onClick={() => setPage(Page - 1)}> -1</button>}
+      <div>{Page}</div>{ HasMore &&
+      <button onClick={() => setPage(Page + 1)}>  1</button>
+      }
+      </div>
+    </div>
+  )
+}
+
 function User(props){
   const [User, setUser] = useState([]);
   const idForSearch =  props.match.params.id
@@ -345,20 +377,17 @@ function User(props){
   const [PostType, setPostType] = useState("posts");
 
   useEffect(() => {
-    console.log(idForSearch)
+
     
     Axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!3zl2.7RwKvwK2p-bY`).then((data) => {
     setUser(data.data.items[0])
-    console.log(data.data.items[0])
 
    })
    Axios.get(`/2.2/users/${idForSearch}/tags?order=desc&sort=popular&site=stackoverflow`).then((data) => {
-    console.log(data.data.items)//tags
     setTags(data.data.items)
    })
 }, [window.location.href])
   return(<div className="userPage">
-    {console.log(User)}
     <div className="userPageShell">
       <div className="userPageHeader">
         <div className="userPageImage">
@@ -386,6 +415,9 @@ function User(props){
       </ul>
       <div className="userPagePosts">
         <UserPagePostsComponent  User={User}/>
+      </div>
+      <div className="userPageComments">
+        <UserPageComments  User={User}/>
       </div>
     </div>
 
@@ -437,7 +469,6 @@ function UserCell(props) {
   useEffect(() => {
     Axios.get(decodecsharp(`/2.2/users/${user.user_id}/tags?order=desc&sort=popular&site=stackoverflow`)).then((data) => {
       setFavoriteTags(data.data.items)
-      console.log(data.data.items)
    })
 }, [])
 
@@ -456,7 +487,8 @@ function UserCell(props) {
                   {favoritTags.map((tag, index) => index < 5 && <li key={user.user_id*index+Math.random()+12345}>{tag.name}</li> )}
                 </ul>
               </div>
-            </div>{
+            </div>
+            {
             IsShown && <div className=" absolutePosition">
             <div className="Badges">
                       <div className="gold"> {user.badge_counts.gold}</div>
@@ -485,7 +517,7 @@ function Users(props) {
   
   useEffect(() => {
     
-     Axios.get(`/2.2/users?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+     Axios.get(`/2.2/users?page=${Page}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...data.data.items]);
       setPage(1)
@@ -493,7 +525,7 @@ function Users(props) {
     })
 }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/users?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    Axios.get(`/2.2/users?page=${Page+1}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...Users,...data.data.items]);
       setPage(Page+1);
@@ -570,7 +602,6 @@ const dispatch = useDispatch();
   
   const searchOnSite = (e) => {
     e.preventDefault();
-    console.log(InputSeach)
   }
 
   useEffect(() => {
@@ -578,7 +609,6 @@ const dispatch = useDispatch();
     Axios.get("/2.2/me?order=desc&sort=reputation&site=stackoverflow&filter=!--1nZv)deGu1&key="+app_key+"&access_token="+userInfo.userInfo)
     .then(function (response) {
       setuserAccount(response.data.items[0])
-      console.log(response.data.items[0])
     })
 }, [userInfo])
 
@@ -648,7 +678,6 @@ const dispatch = useDispatch();
 }
 
 const userInfo = Cookie.getJSON("userToken") || null;
-console.log(userInfo)
 const initialState = {userSignin: { userInfo }};
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
