@@ -114,7 +114,7 @@ return (<div className="questionsComponent">
             </div>
           </div>
           <div className="QuestionRowBody">
-            <Link to={"/question/"+ Question.question_id} className="QuestionRowBodyTitle" dangerouslySetInnerHTML={{__html:Question.title}}>
+            <Link to={"/questions/"+ Question.question_id} className="QuestionRowBodyTitle" dangerouslySetInnerHTML={{__html:Question.title}}>
               
             </Link>
             <ul className="QuestionRowBodyTags">
@@ -245,20 +245,22 @@ const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 function PostComponent(props) {
   const [Post, setPost] = useState([])
   useEffect(() => {
-    if (props?.Post?.post_type === "answer"){
-      Axios.get(`/2.2/answers/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow`).then((data) => {
-        setPost(data.data.items)
+    if (props?.Post?.post_type === "answer" || props.type === "answers"){
+      Axios.get(`/2.2/answers/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZx.Tkxh*`).then((data) => {
+        setPost(data?.data?.items[0])
       })
     }
-    if (props?.Post?.post_type === "question"){
-      Axios.get(`/2.2/questions/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow`).then((data) => {
-        setPost(data.data.items)
+    if (props?.Post?.post_type === "question"  || props.type === "questions"){
+      Axios.get(`/2.2/questions/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
+        setPost(data?.data?.items[0])
       })
     }
-  
 }, [])
-  return(<div>
-    hi{console.log(Post)}
+  return(<div className="PostFromUserPage">
+    <div className="PostFromUserPageType">{(props?.Post?.post_type) ? props?.Post?.post_type[0] : props.type[0]}</div>
+    <div className={"PostFromUserPageScore " + ((Post?.is_accepted) ? "accepted" : "") }>{props?.Post?.score}</div>
+    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id}>{Post?.title}</Link>
+    <div className="PostFromUserDate">{ timeConverter(props?.Post?.creation_date)}</div>
   </div>)
 }
 
@@ -277,7 +279,7 @@ function UserPagePostsComponent(props) {
     setPosts([...data.data.items]);
     setPage(1)
    })
-}, [PostsType, PostsType, user_id])
+}, [PostsType, PostsSort, user_id])
 
 
 const setPagePost = (page) => {
@@ -285,8 +287,6 @@ const setPagePost = (page) => {
     setPage(page);
     setPosts([...data.data.items]);
     setHasMore(data.data.has_more);
-
-    console.log(data.data,1,page)
   }) 
 }
   
@@ -315,7 +315,7 @@ const setPagePost = (page) => {
         </div>
       </div>
       <div className="UserPostsExact">
-          {Posts.map((Post, index) => <PostComponent Post={Post} key={index}/>)}
+          {Posts.map((Post, index) => <PostComponent Post={Post} type={PostsType} key={index}/>)}
       </div>
       {((Page === 1 && HasMore && Posts.length) || (Page > 1))  &&
       <div className="UserPostsPageControl">
