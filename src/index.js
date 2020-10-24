@@ -269,7 +269,7 @@ function PostComponent(props) {
   return(<div className="PostFromUserPage">
     <div className="PostFromUserPageType">{(thisGavno?.post_type) ? thisGavno?.post_type[0] : props.type[0]}</div>
     <div className={"PostFromUserPageScore " + ((Post?.is_accepted) ? "accepted" : "") }>{thisGavno?.score}</div>
-    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id +((thisGavno?.post_type === "answer" || props.type === "answers") ? "#answer-"+ (Post?.answer_id) : "")}>{Post.title}</Link>
+    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id +((thisGavno?.post_type === "answer" || props.type === "answers") ? "#answer-"+ (Post?.answer_id) : "")}>{Post?.title}</Link>
     <div className="PostFromUserDate">{ timeConverter(thisGavno?.creation_date)}</div>
   </div>)
 }
@@ -357,6 +357,7 @@ function UserPageComments(props) {
   const [Comments, setComments] = useState([])
   const [Page, setPage] = useState(1)
   const [HasMore, setHasMore] = useState(false)
+
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
@@ -367,6 +368,9 @@ function UserPageComments(props) {
   },[Page,user_id])
   return (
     <div className="UserPageCommentsMap">
+      <div>
+        Comments
+      </div>
       <div className="UserPageCommentsMapExact">
       {Comments.map((comment, index) => <div className="UserPageComment" key={index*Math.random()}>
         <Link to={`/questions/`+comment.post_id+"#comment-"+comment.comment_id} dangerouslySetInnerHTML={{__html:comment.body}}></Link>
@@ -390,11 +394,18 @@ function User(props){
   const idForSearch =  props.match.params.id
   const [Tags, setTags] = useState([]);
   const [PostType, setPostType] = useState("posts");
+  const [Privileges, setPrivileges] = useState([])
+  const [Associated, setAssociated] = useState([])
 
   useEffect(() => {
 
-    
-    Axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!3zl2.7RwKvwK2p-bY`).then((data) => {
+    Axios.get(`/2.2/users/${idForSearch}/privileges?site=stackoverflow`).then(data => {
+      setPrivileges(data.data.items)
+    })
+    Axios.get(`/2.2/users/${idForSearch}/associated`).then(data => {
+      setAssociated(data.data.items)
+    })
+    Axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
     setUser(data.data.items[0])
 
    })
@@ -434,10 +445,46 @@ function User(props){
       <div className="userPageComments">
         <UserPageComments  User={User}/>
       </div>
+      <div className="userPagePrivileges">
+        <div>
+        Privileges
+        </div>
+        <div className="userPagePrivilegesExact">
+        {Privileges.map((map, index) => <div className="Privilege" key={index*Math.random()}>
+          {map.short_description}
+        </div>)}
+        </div>
+      </div>
+      {Associated.length &&
+      <div className="userPageAssociated">
+          <div className="">
+            Associated accounts
+          </div>
+          <div className="userPageAssociatedMap">
+            {Associated.map((accc, index) => <UserCell user={accc} key={index}/>)}
+          </div>
+      </div>
+      }
     </div>
 
   </div>)
 }
+
+function UserAssociated(props){
+  const acc = props.acc
+  const [User, setUser] = useState({})
+  useEffect(() => {
+    Axios.get(`/2.2/users/${acc.user_id}?order=desc&sort=reputation&site=stackoverflow`).then((data) =>{ 
+      setUser(data.data.items[0])
+                   console.log(data.data.items[0])
+}
+      )
+  }, [window.location.href])
+  return( <div>
+
+  </div>)
+}
+
 
 class App extends React.Component{
   constructor() {
