@@ -356,12 +356,15 @@ function UserPageComments(props) {
     <div className="UserPageCommentsMap">
       {console.log(Comments)}
       <div className="UserPageCommentsMapExact">
-      {Comments.map((comment, index) => <div key={index*Math.random()}>
+      {Comments.map((comment, index) => <div className="UserPageComment" key={index*Math.random()}>
+        <Link to={`/questions/`+comment.post_id+"#comment-"+comment.comment_id} dangerouslySetInnerHTML={{__html:comment.body}}></Link>
+        <div>{ timeConverter(comment.creation_date)}</div>
       </div>)}
       </div>
       <div className="UserPageCommentsControl">{
         Page > 1&&
-      <button onClick={() => setPage(Page - 1)}> -1</button>}
+      <button onClick={() => setPage(Page - 1)}> -1</button>
+      }
       <div>{Page}</div>{ HasMore &&
       <button onClick={() => setPage(Page + 1)}>  1</button>
       }
