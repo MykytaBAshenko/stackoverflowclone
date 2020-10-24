@@ -165,6 +165,9 @@ ul{
 .QuestionAbout *{
   max-width: 88vw;
 }
+.QuestionAbout ol{
+  margin-left: 15px;
+}
 .QuestionAbout pre{
   width:100%;
 }

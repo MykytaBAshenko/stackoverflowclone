@@ -59,7 +59,7 @@ function Questions(props) {
       setPage(1)
       id_for_scroll = "l"+(Questions.length-1);
     })
-}, [SortOrder, SortBy])
+}, [SortOrder, SortBy,window.location.href])
   const setMoreQuestions = () => {
     Axios.get(`/2.2/questions?page=${Page+1}&pagesize=50&order=${SortOrder}&filter=!9_bDDx5Ia&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
@@ -242,21 +242,35 @@ return (<div className="questionsComponent">
 }
 const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 
+function PostComponent(props) {
+  const [Post, setPost] = useState([])
+  useEffect(() => {
+    console.log(props.Post)
+    if (props?.Post?.post_type === "answer"){
+      // Axios.get(`/2.2/answers/{ids}?order=desc&sort=activity&site=stackoverflow`)
+    }
+    if (props?.Post?.post_type === "question"){
+      
+    }
+  
+}, [])
+  return(<div>
+    hi{console.log(props.Post)}
+  </div>)
+}
+
 
 function UserPagePostsComponent(props) {
   const [Posts, setPosts] = useState([])
   const [Page, setPage] = useState(1);
-  const [isHaveAnyPosts, setisHaveAnyPosts] = useState(false)
   const [PostsType, setPostsType] = useState("posts");
   const [PostsSort, setPostsSort] = useState("votes");
   const [HasMore, setHasMore] = useState(false);
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow`).then((data) => {
+    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
     setHasMore(data.data.has_more);
-    if(data.data.items.length) 
-      setisHaveAnyPosts(true)
     setPosts([...data.data.items]);
     setPage(1)
    })
@@ -264,7 +278,7 @@ function UserPagePostsComponent(props) {
 
 
 const setPagePost = (page) => {
-  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow`).then((data) => {
+  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=15&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
     setPage(page);
     setPosts([...data.data.items]);
     setHasMore(data.data.has_more);
@@ -274,7 +288,7 @@ const setPagePost = (page) => {
 }
   
   return(
-     isHaveAnyPosts &&
+     ((Posts.length && PostsType === "posts") || PostsType !== "posts") &&
     <div className="PostsComponent">
       <div className="PostsFilters">
         <div className="PostsFiltersType">
@@ -298,16 +312,16 @@ const setPagePost = (page) => {
         </div>
       </div>
       <div className="UserPostsExact">
-        {console.log(Posts)}
+          {Posts.map((Post, index) => <PostComponent Post={Post} key={index}/>)}
       </div>
-      {(Page == 1 && HasMore)  &&
+      {((Page === 1 && HasMore && Posts.length) || (Page > 1))  &&
       <div className="UserPostsPageControl">
         {Page > 1 &&
         <button onClick={() => setPagePost(Page - 1)}>
           -1
         </button>
         }
-        <div>
+        <div className="PostsList">
           {Page}
         </div>
         {HasMore &&
@@ -386,7 +400,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://c56fff50569b.ngrok.io',
+      channelUrl: 'http://9377a15ba52a.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
