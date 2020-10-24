@@ -245,17 +245,20 @@ const app_key = '6)zESuXpc55o6lZ3o4psDQ(('
 function PostComponent(props) {
   const [Post, setPost] = useState([])
   useEffect(() => {
-    console.log(props.Post)
     if (props?.Post?.post_type === "answer"){
-      // Axios.get(`/2.2/answers/{ids}?order=desc&sort=activity&site=stackoverflow`)
+      Axios.get(`/2.2/answers/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow`).then((data) => {
+        setPost(data.data.items)
+      })
     }
     if (props?.Post?.post_type === "question"){
-      
+      Axios.get(`/2.2/questions/${props.Post.post_id}?order=desc&sort=activity&site=stackoverflow`).then((data) => {
+        setPost(data.data.items)
+      })
     }
   
 }, [])
   return(<div>
-    hi{console.log(props.Post)}
+    hi{console.log(Post)}
   </div>)
 }
 
@@ -414,7 +417,7 @@ class App extends React.Component{
         <Route exact path="/" component={Questions} />
         <Route exact path="/questions" component={Questions} />
         <Route exact path="/questions/tagged/:tag" component={Questions} />
-        <Route exact path="/question/:questionId" component={Question} />
+        <Route exact path="/questions/:questionId" component={Question} />
         <Route exact path="/tags" component={Tags} />
         <Route exact path="/users" component={Users} />
         <Route exact path="/users/:id" component={User} />
