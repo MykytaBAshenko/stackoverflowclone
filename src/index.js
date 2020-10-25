@@ -284,7 +284,7 @@ function UserPagePostsComponent(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=4&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
     setHasMore(data.data.has_more);
     setPosts([...data.data.items]);
     setPage(1)
@@ -293,7 +293,7 @@ function UserPagePostsComponent(props) {
 
 
 const setPagePost = (page) => {
-  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=4&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+  Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
     setPage(page);
     setPosts([...data.data.items]);
     setHasMore(data.data.has_more);
@@ -353,6 +353,10 @@ const setPagePost = (page) => {
   )
 }
 
+function TimeLineComponent(props) {
+
+}
+
 function UserPageComments(props) {
   const [Comments, setComments] = useState([])
   const [Page, setPage] = useState(1)
@@ -367,6 +371,7 @@ function UserPageComments(props) {
     })
   },[Page,user_id])
   return (
+    Comments.length ?
     <div className="UserPageCommentsMap">
       <div>
         Comments
@@ -385,7 +390,7 @@ function UserPageComments(props) {
       <button onClick={() => setPage(Page + 1)}>  1</button>
       }
       </div>
-    </div>
+    </div> : <></>
   )
 }
 
@@ -465,6 +470,14 @@ function User(props){
           </div>
       </div>
       }
+      <div className="userPageTimeline">
+        <div >
+          TimeLine
+        </div>
+        <div userPageTimeline="userPageTimelineExact">
+          {/* <TimeLineComponent User={User}/> */}
+        </div>
+      </div>
     </div>
 
   </div>)
