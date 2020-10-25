@@ -191,7 +191,7 @@ function Tags(props) {
 
   useEffect(() => {
     
-     Axios.get(`/2.2/tags?page=${Page}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
+     Axios.get(`/2.2/tags?page=${Page}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...data.data.items]);
       setPage(1)
@@ -199,7 +199,7 @@ function Tags(props) {
     })
 }, [SortOrder, SortBy,TagSearch])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/tags?page=${Page+1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+    Axios.get(`/2.2/tags?page=${Page+1}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...Tags,...data.data.items]);
       setPage(Page+1);
@@ -460,8 +460,8 @@ function User(props){
           <div className="">
             Associated accounts
           </div>
-          <div className="userPageAssociatedMap">
-            {Associated.map((accc, index) => <UserCell user={accc} key={index}/>)}
+          <div className="UsersMap">
+            {Associated.map((accc, index) => <UserAssociated acc={accc} key={index}/>)}
           </div>
       </div>
       }
@@ -472,17 +472,32 @@ function User(props){
 
 function UserAssociated(props){
   const acc = props.acc
-  const [User, setUser] = useState({})
+  const [user, setUser] = useState({})
   useEffect(() => {
-    Axios.get(`/2.2/users/${acc.user_id}?order=desc&sort=reputation&site=stackoverflow`).then((data) =>{ 
+    Axios.get(`/2.2/users/${acc.user_id}?order=desc&sort=reputation&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) =>{ 
       setUser(data.data.items[0])
-                   console.log(data.data.items[0])
+                   console.log(data.data,acc)
 }
       )
   }, [window.location.href])
-  return( <div>
+  return(  user &&   <div className={"UserCell "}>
 
-  </div>)
+    
+     <div  className={"UserCellShell "}>
+            <div className="FirstInfo">
+              <Link to={"/users/"+user?.user_id}>
+                <img src={user?.profile_image} alt={user?.display_name}/>
+              </Link>
+              <div className="FirstInfoAbout">
+                <Link to={"/users/"+user?.user_id} dangerouslySetInnerHTML={{__html:user?.display_name}}></Link>
+                <div className="locationUserCell" dangerouslySetInnerHTML={{__html:`<i class="fa fa-location"></i> ${user?.location}`}}></div>
+                <div className="reputationUserCell">Reputation: {user?.reputation}</div>
+                
+              </div>
+            </div>
+            </div>
+
+  </div> || null)
 }
 
 
@@ -497,7 +512,7 @@ class App extends React.Component{
     window.SE.init({
       clientId: 18924, 
       key: '6)zESuXpc55o6lZ3o4psDQ((', 
-      channelUrl: 'http://1de3e9a3ee4b.ngrok.io',
+      channelUrl: 'http://4fedc69ac457.ngrok.io',
       complete: function(data) { 
           // console.log(data)
       }
@@ -579,7 +594,7 @@ function Users(props) {
   
   useEffect(() => {
     
-     Axios.get(`/2.2/users?page=${Page}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+     Axios.get(`/2.2/users?page=${Page}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...data.data.items]);
       setPage(1)
@@ -587,7 +602,7 @@ function Users(props) {
     })
 }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/users?page=${Page+1}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    Axios.get(`/2.2/users?page=${Page+1}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...Users,...data.data.items]);
       setPage(Page+1);
