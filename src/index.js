@@ -354,7 +354,41 @@ const setPagePost = (page) => {
 }
 
 function TimeLineComponent(props) {
-
+  const [TimeLine,setTimeLine] = useState([]);
+  const [Page, setPage] = useState(1)
+  const [HasMore, setHasMore] = useState(false)
+  const user_id = props.User.user_id
+  useEffect(() => {
+    user_id &&
+    Axios.get(`/2.2/users/${user_id}/timeline?pagesize=40&page=${Page}&site=stackoverflow`).then(data => {
+      setTimeLine(data.data.items)
+      setHasMore(data.data.has_more);
+      console.log(data.data.items)
+    })
+  },[Page,user_id])
+  return (
+    TimeLine.length ? 
+    <div className="userPageTimeline">
+        <div >
+          TimeLine
+        </div>
+        <div className="userPageTimelineExact">
+          {TimeLine.map((time, index) => <div key={index+ Math.random()} className="TimeLineComponent">
+            <div>{timeConverter(time.creation_date)}</div>
+            <div>{time.timeline_type}</div>
+            <Link to={"/questions/"+time.post_id}>{time.detail || time.title}</Link>
+          </div>)}
+        </div>
+        <div className="UserPageCommentsControl">{
+        Page > 1&&
+      <button onClick={() => setPage(Page - 1)}> -1</button>
+      }
+      <div>{Page}</div>{ HasMore &&
+      <button onClick={() => setPage(Page + 1)}>  1</button>
+      }
+      </div>
+      </div> : <></>
+  )
 }
 
 function UserPageComments(props) {
@@ -470,14 +504,9 @@ function User(props){
           </div>
       </div>
       }
-      <div className="userPageTimeline">
-        <div >
-          TimeLine
-        </div>
-        <div userPageTimeline="userPageTimelineExact">
-          {/* <TimeLineComponent User={User}/> */}
-        </div>
-      </div>
+      
+          <TimeLineComponent User={User}/>
+      
     </div>
 
   </div>)
