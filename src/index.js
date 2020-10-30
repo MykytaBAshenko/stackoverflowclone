@@ -158,11 +158,6 @@ function QuestionBody(props) {
     return false
   }
   
-  // useEffect(() => {
-  //   console.log(QuestionId)
-  //   if(QuestionId) 
-   
-  // }, [QuestionId,window.location.href])
   return (
     <div className="QuestionCompnentBody">
       <div className="QuestionComponentBodyTitle" dangerouslySetInnerHTML={{ __html: props.Question.title }}></div>
@@ -216,7 +211,7 @@ function QuestionBody(props) {
             }
           </ul>
           <div>
-          {props?.Question?.is_answered && <div>Answered <span>
+          {props?.Question?.is_answered&& props?.Question?.answers?.find(isPrime)?.last_edit_date && <div>Answered <span>
             {timeConverter(props?.Question?.answers?.find(isPrime)?.last_edit_date)}
             </span></div>}
             <div>
@@ -233,7 +228,16 @@ function QuestionBody(props) {
         </div>
         <div className="comments">
     {props.Comments.map((question, index) => <div key={index+ Math.random()}>
-      111
+      <div className="comment-body" dangerouslySetInnerHTML={{ __html:question.body}}>
+      </div>
+      <div className="comment-meta">
+        <Link className="comment-meta_User" to={"/users/" + question.owner.user_id}>
+            {question.owner.display_name}
+        </Link>
+        <div className="comment-meta_Date">
+            {timeConverter(question.creation_date)}
+        </div>
+      </div>
     </div>)}
   </div>
       </div>
@@ -270,7 +274,7 @@ function Question(props) {
   }
 
   const upVote = () => {
-    if (!userInfo) {
+    if (!userInfo.userInfo) {
       do_login()
       return;
     }
@@ -283,7 +287,7 @@ function Question(props) {
     }).then(resp => resp.text()).then(console.log);
   }
   const downVote = () => {
-    if (!userInfo) {
+    if (!userInfo.userInfo) {
       do_login()
       return;
     }
@@ -300,7 +304,10 @@ function Question(props) {
       setQuestion(data.data.items[0])
       console.log(data.data.items[0])
     })
-    Axios.get(`/2.2/questions/${questionId}/comments?order=desc&sort=creation&site=stackoverflow`).then((data) => {
+    
+  }, [window.location.href])
+  useEffect(() => {
+    Axios.get(`/2.2/questions/${questionId}/comments?order=desc&sort=creation&site=stackoverflow&filter=!9_bDE*lEk`).then((data) => {
       console.log(...data.data.items)
       
       setComments([...data.data.items]);
@@ -703,12 +710,12 @@ class App extends React.Component {
 
     this.state = {
     }
-  }
+  } 
   componentDidMount() {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'http://c574f875d0fa.ngrok.io',
+      channelUrl: 'https://139477d2502b.ngrok.io',
       complete: function (data) {
         // console.log(data)
       }
