@@ -1,6 +1,5 @@
 import ReactDOM from 'react-dom';
 import React, { useEffect, useState } from 'react';
-import './index.css';
 import * as serviceWorker from './serviceWorker';
 import './App.css';
 import Axios from 'axios'
@@ -709,7 +708,7 @@ class App extends React.Component {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'http://1871e9f4f30d.ngrok.io',
+      channelUrl: 'http://c574f875d0fa.ngrok.io',
       complete: function (data) {
         // console.log(data)
       }
