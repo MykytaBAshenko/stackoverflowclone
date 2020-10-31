@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React, { useEffect, useState } from 'react';
 import * as serviceWorker from './serviceWorker';
 import './App.css';
-import Axios from 'axios'
+import axios from 'axios'
 import { Provider, useSelector, useDispatch } from 'react-redux';
 import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import promiseMiddleware from 'redux-promise';
@@ -12,7 +12,7 @@ import { BrowserRouter, Route, Switch, Link } from "react-router-dom"
 // Id 18924
 // Client Secret jc3oSbdguMBJ7MwimeH8kA((
 // key 6)zESuXpc55o6lZ3o4psDQ((
-Axios.defaults.baseURL = "https://api.stackexchange.com"
+axios.defaults.baseURL = "https://api.stackexchange.com"
 // 14464780
 // VhJOwhDs5V3zDbixqZwT7A))
 function timeConverter(UNIX_timestamp) {
@@ -52,7 +52,7 @@ function Questions(props) {
 
   useEffect(() => {
 
-    Axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
+    axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...data.data.items]);
       setPage(1)
@@ -60,7 +60,7 @@ function Questions(props) {
     })
   }, [SortOrder, SortBy, window.location.href])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/questions?page=${Page + 1}&pagesize=50&order=${SortOrder}&filter=!9_bDDx5Ia&sort=${SortBy}&site=stackoverflow`).then((data) => {
+    axios.get(`/2.2/questions?page=${Page + 1}&pagesize=50&order=${SortOrder}&filter=!9_bDDx5Ia&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...Questions, ...data.data.items]);
       setPage(Page + 1);
@@ -246,8 +246,95 @@ function QuestionBody(props) {
 }
 
 function Answers(props) {
-  return(<div>
-    answers
+  const [Answers, setAnswers] = useState([]);
+  const [SortBy, setSortBy] = useState("votes")
+  const [SortOrder, setSortOrder] = useState("desc")
+  const userSignin = useSelector(state => state.userSignin);
+  const userInfo = userSignin;
+  const dispatch = useDispatch()
+  useEffect(() => {
+    props.Question.question_id &&
+    axios.get(`/2.2/questions/${props.Question.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!LYA)Nz3qbZrw6sTybH(sU7`).then((data) => {
+      setAnswers([...data.data.items]);
+    })
+  }, [SortBy,SortOrder,props.Question.question_id,window.location.href])
+
+  const do_login = () => {
+    window.SE.authenticate({
+      success: function (data) {
+        dispatch({ type: "USER_SIGNIN_SUCCESS", payload: data.accessToken });
+        Cookie.set('userToken', JSON.stringify(data.accessToken));
+      },
+      error: function (data) {
+        alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage);
+      },
+      scope: ['write_access', 'private_info', 'read_inbox'],
+      networkUsers: true
+    })
+  }
+
+  const upVote = (answearid) => {
+    if (!userInfo.userInfo) {
+      do_login()
+      return;
+    }
+    axios.post(`/2.2/answers/${answearid}/upvote`, {
+      body: {
+        key: app_key,
+        access_token: userInfo.userInfo,
+        site: "stackoverflow"
+      }
+    }).then(resp => resp.text()).then(console.log);
+  }
+  const downVote = (answearid) => {
+    if (!userInfo.userInfo) {
+      do_login()
+      return;
+    }
+    axios.post(`/2.2/answers/${answearid}/downvote`, {
+      body: {
+        key: app_key,
+        access_token: userInfo.userInfo,
+        site: "stackoverflow"
+      }
+    }).then(resp => resp.text()).then(console.log);
+  }
+
+  return(<div className="QuestionPageAnswers">
+    <div className="QuestionPageAnswersHeader">
+      <div>
+        <span>Answers</span> 
+        <span> {Answers.length}</span>
+      </div>
+      <div className="questionsControlOrder">
+        <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
+        </button>
+      </div>
+      <div className="questionsControlSortBy">
+        <button className={(SortBy === "popular " ? " active" : "")} onClick={() => setSortBy("votes")}>
+          votes
+      </button>
+        <button className={(SortBy === "activity " ? " active" : "")} onClick={() => setSortBy("activity")}>
+          activity
+      </button>
+        <button className={(SortBy === "name " ? " active" : "")} onClick={() => setSortBy("creation")}>
+          creation
+      </button>
+      </div>
+    </div>
+    <div className="QuestionPageAnswearsExact">
+      {Answers.map((answear, index) => 
+      <div className="AnswearFromQuestion" key={index+ Math.random()}>
+        <div className="AnswearFromQuestionControl">
+          {/* <button onClick={}>
+
+          </button> */}
+        </div>
+      </div>
+      )}
+
+    </div>
   </div>)
 }
 
@@ -258,6 +345,7 @@ function Question(props) {
   const userSignin = useSelector(state => state.userSignin);
   const userInfo = userSignin;
   const [userAccount, setuserAccount] = useState([])
+  const [IsSetLike,setIsSetLike] = useState(false)
   const dispatch = useDispatch();
 
   const do_login = () => {
@@ -269,29 +357,36 @@ function Question(props) {
       error: function (data) {
         alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage);
       },
+      scope: ['write_access', 'private_info', 'read_inbox'],
       networkUsers: true
     })
   }
 
   const upVote = () => {
+    const formData = new FormData();
     if (!userInfo.userInfo) {
       do_login()
       return;
     }
-    Axios.post(`/2.2/questions/${questionId}/upvote`, {
-      body: {
-        key: app_key,
-        access_token: userInfo.userInfo,
-        site: "stackoverflow"
-      }
-    }).then(resp => resp.text()).then(console.log);
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+	
+    
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/questions/${questionId}/upvote`,
+      data: formData,
+    }).then(resp => {setQuestion(resp.data.items[0]);console.log(resp.data.items[0])});
   }
   const downVote = () => {
     if (!userInfo.userInfo) {
       do_login()
       return;
     }
-    Axios.post(`/2.2/questions/${questionId}/downvote`, {
+    axios.post(`/2.2/questions/${questionId}/downvote`, {
       body: {
         key: app_key,
         access_token: userInfo.userInfo,
@@ -300,14 +395,21 @@ function Question(props) {
     }).then(resp => resp.text()).then(console.log);
   }
   useEffect(() => {
-    Axios.get(`/2.2/questions/${questionId}?order=desc&sort=activity&site=stackoverflow&filter=!gHxZH78yCuIaWIg7.*4vdWlEJvCPGislsl.`).then((data) => {
+
+    if(userInfo.userInfo)
+    axios.get(`/2.2/questions/${questionId}?order=desc&sort=activity&site=stackoverflow&filter=!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k&key=`+ app_key + "&access_token=" + userInfo.userInfo).then((data) => {
+      setQuestion(data.data.items[0])
+      console.log(data.data.items[0])
+    })
+    else
+    axios.get(`/2.2/questions/${questionId}?order=desc&sort=activity&site=stackoverflow&filter=!gHxZH78yCuIaWIg7.*4vdWlEJvCPGislsl.`).then((data) => {
       setQuestion(data.data.items[0])
       console.log(data.data.items[0])
     })
     
   }, [window.location.href])
   useEffect(() => {
-    Axios.get(`/2.2/questions/${questionId}/comments?order=desc&sort=creation&site=stackoverflow&filter=!9_bDE*lEk`).then((data) => {
+    axios.get(`/2.2/questions/${questionId}/comments?order=desc&sort=creation&site=stackoverflow&filter=!9_bDE*lEk`).then((data) => {
       console.log(...data.data.items)
       
       setComments([...data.data.items]);
@@ -326,7 +428,7 @@ function decodecsharp(str) {
 function Tag({ tag, id }) {
   const [Wiki, setWiki] = useState(" ");
   useEffect(() => {
-    Axios.get(decodecsharp(`/2.2/tags/${tag.name}/wikis?site=stackoverflow`)).then((data) => {
+    axios.get(decodecsharp(`/2.2/tags/${tag.name}/wikis?site=stackoverflow`)).then((data) => {
       setWiki(data.data.items[0].excerpt)
     })
   }, [tag])
@@ -352,7 +454,7 @@ function Tags(props) {
 
   useEffect(() => {
 
-    Axios.get(`/2.2/tags?page=${Page}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
+    axios.get(`/2.2/tags?page=${Page}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...data.data.items]);
       setPage(1)
@@ -360,7 +462,7 @@ function Tags(props) {
     })
   }, [SortOrder, SortBy, TagSearch])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/tags?page=${Page + 1}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+    axios.get(`/2.2/tags?page=${Page + 1}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...Tags, ...data.data.items]);
       setPage(Page + 1);
@@ -409,18 +511,18 @@ function PostComponent(props) {
   useEffect(() => {
     console.log(thisGavno)
     if ((thisGavno?.post_type === "answer" && props.type === "posts") || props.type === "answers") {
-      Axios.get(`/2.2/answers/${(thisGavno?.answer_id ? thisGavno?.answer_id : thisGavno?.post_id)}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZx.Tkxh*`).then((data) => {
+      axios.get(`/2.2/answers/${(thisGavno?.answer_id ? thisGavno?.answer_id : thisGavno?.post_id)}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZx.Tkxh*`).then((data) => {
         setPost(data?.data?.items[0])
       })
     } else
       if ((thisGavno?.post_type === "question" && props.type === "posts") || props.type === "questions") {
-        Axios.get(`/2.2/questions/${thisGavno?.question_id ? thisGavno?.question_id : thisGavno?.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
+        axios.get(`/2.2/questions/${thisGavno?.question_id ? thisGavno?.question_id : thisGavno?.post_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
           setPost(data?.data?.items[0])
         })
       }
       else
         if (props.type === "favorites") {
-          Axios.get(`/2.2/questions/${thisGavno?.question_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
+          axios.get(`/2.2/questions/${thisGavno?.question_id}?order=desc&sort=activity&site=stackoverflow&filter=!--1nZwQ5Qg.w`).then((data) => {
             setPost(data?.data?.items[0])
           })
         }
@@ -445,7 +547,7 @@ function UserPagePostsComponent(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-      Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+      axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
         setHasMore(data.data.has_more);
         setPosts([...data.data.items]);
         setPage(1)
@@ -454,7 +556,7 @@ function UserPagePostsComponent(props) {
 
 
   const setPagePost = (page) => {
-    Axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+    axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
       setPage(page);
       setPosts([...data.data.items]);
       setHasMore(data.data.has_more);
@@ -514,6 +616,7 @@ function UserPagePostsComponent(props) {
   )
 }
 
+
 function TimeLineComponent(props) {
   const [TimeLine, setTimeLine] = useState([]);
   const [Page, setPage] = useState(1)
@@ -521,7 +624,7 @@ function TimeLineComponent(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-      Axios.get(`/2.2/users/${user_id}/timeline?pagesize=40&page=${Page}&site=stackoverflow`).then(data => {
+      axios.get(`/2.2/users/${user_id}/timeline?pagesize=40&page=${Page}&site=stackoverflow`).then(data => {
         setTimeLine(data.data.items)
         setHasMore(data.data.has_more);
         console.log(data.data.items)
@@ -560,7 +663,7 @@ function UserPageComments(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-      Axios.get(`/2.2/users/${user_id}/comments?order=desc&pagesize=4&page=${Page}&sort=creation&site=stackoverflow&filter=!--1nZxT0.tIV`).then(data => {
+      axios.get(`/2.2/users/${user_id}/comments?order=desc&pagesize=4&page=${Page}&sort=creation&site=stackoverflow&filter=!--1nZxT0.tIV`).then(data => {
         setComments(data.data.items)
         setHasMore(data.data.has_more);
       })
@@ -599,17 +702,17 @@ function User(props) {
 
   useEffect(() => {
 
-    Axios.get(`/2.2/users/${idForSearch}/privileges?site=stackoverflow`).then(data => {
+    axios.get(`/2.2/users/${idForSearch}/privileges?site=stackoverflow`).then(data => {
       setPrivileges(data.data.items)
     })
-    Axios.get(`/2.2/users/${idForSearch}/associated`).then(data => {
+    axios.get(`/2.2/users/${idForSearch}/associated`).then(data => {
       setAssociated(data.data.items)
     })
-    Axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    axios.get(`/2.2/users/${idForSearch}?order=desc&sort=reputation&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setUser(data.data.items[0])
 
     })
-    Axios.get(`/2.2/users/${idForSearch}/tags?order=desc&sort=popular&site=stackoverflow`).then((data) => {
+    axios.get(`/2.2/users/${idForSearch}/tags?order=desc&sort=popular&site=stackoverflow`).then((data) => {
       setTags(data.data.items)
     })
   }, [window.location.href])
@@ -677,7 +780,7 @@ function UserAssociated(props) {
   const acc = props.acc
   const [user, setUser] = useState({})
   useEffect(() => {
-    Axios.get(`/2.2/users/${acc.user_id}?order=desc&sort=reputation&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    axios.get(`/2.2/users/${acc.user_id}?order=desc&sort=reputation&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setUser(data.data.items[0])
       console.log(data.data, acc)
     }
@@ -715,9 +818,9 @@ class App extends React.Component {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'https://139477d2502b.ngrok.io',
+      channelUrl: 'http://08b58107f5dd.ngrok.io',
       complete: function (data) {
-        // console.log(data)
+        // console.log(data) 
       }
     })
   } 
@@ -747,7 +850,7 @@ function UserCell(props) {
   const [favoritTags, setFavoriteTags] = useState([]);
   const [IsShown, setIsShown] = useState(false)
   useEffect(() => {
-    Axios.get(decodecsharp(`/2.2/users/${user.user_id}/tags?order=desc&sort=popular&site=stackoverflow`)).then((data) => {
+    axios.get(decodecsharp(`/2.2/users/${user.user_id}/tags?order=desc&sort=popular&site=stackoverflow`)).then((data) => {
       setFavoriteTags(data.data.items)
     })
   }, [])
@@ -797,7 +900,7 @@ function Users(props) {
 
   useEffect(() => {
 
-    Axios.get(`/2.2/users?page=${Page}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    axios.get(`/2.2/users?page=${Page}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...data.data.items]);
       setPage(1)
@@ -805,7 +908,7 @@ function Users(props) {
     })
   }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
-    Axios.get(`/2.2/users?page=${Page + 1}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    axios.get(`/2.2/users?page=${Page + 1}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...Users, ...data.data.items]);
       setPage(Page + 1);
@@ -886,7 +989,7 @@ function Navbar(props) {
 
   useEffect(() => {
     if (userInfo.userInfo)
-      Axios.get("/2.2/me?order=desc&sort=reputation&site=stackoverflow&filter=!--1nZv)deGu1&key=" + app_key + "&access_token=" + userInfo.userInfo)
+      axios.get("/2.2/me?order=desc&sort=reputation&site=stackoverflow&filter=!--1nZv)deGu1&key=" + app_key + "&access_token=" + userInfo.userInfo)
         .then(function (response) {
           setuserAccount(response.data.items[0])
         })
@@ -901,7 +1004,7 @@ function Navbar(props) {
       error: function (data) {
         alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage);
       },
-      scope: ['read_inbox,no_expiry'],
+      scope: ['write_access', 'private_info', 'read_inbox'],
       networkUsers: true
     })
   }
