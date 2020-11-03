@@ -45,21 +45,39 @@ function Questions(props) {
   const [Page, setPage] = useState(1)
   const [SortOrder, setSortOrder] = useState("desc")
   const [isShown, setIsShown] = useState(-1)
-
+  const urlParams = new URLSearchParams(window.location.search);
+  const inTitle = urlParams.get('intitle');
   const [HasMore, setHasMore] = useState(false)
   let id_for_scroll = "l" + (Questions.length - 1);
   const tagForSearch = props.match.params.tag
-
+  
   useEffect(() => {
-
+    if (inTitle) {
+      axios.get(`/2.2/search?page=${1}&pagesize=50&order=${SortOrder}&intitle=${inTitle}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
+        setHasMore(data.data.has_more);
+        setQuestions([...data.data.items]);
+        setPage(1)
+        id_for_scroll = "l" + (Questions.length - 1);
+      })
+    }
+    else
     axios.get(`/2.2/questions?page=${1}&pagesize=50&order=${SortOrder}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...data.data.items]);
       setPage(1)
       id_for_scroll = "l" + (Questions.length - 1);
     })
-  }, [SortOrder, SortBy, window.location.href])
+  }, [SortOrder, SortBy])
   const setMoreQuestions = () => {
+    if(inTitle) {
+      axios.get(`/2.2/search?page=${Page + 1}&pagesize=50&order=${SortOrder}&intitle=${inTitle}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
+        setHasMore(data.data.has_more);
+        setQuestions([...Questions, ...data.data.items]);
+        setPage(Page + 1);
+        id_for_scroll = "l" + (Questions.length - 1);
+      })
+    }
+    else
     axios.get(`/2.2/questions?page=${Page + 1}&pagesize=50&order=${SortOrder}&filter=!9_bDDx5Ia&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
       setQuestions([...Questions, ...data.data.items]);
@@ -68,13 +86,11 @@ function Questions(props) {
     })
   }
   return (<div className="questionsComponent">
-    <div className="questionsControl">
-      <div className="questionsControlOrder">
-        <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
-          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
-        </button>
-      </div>
+    <div className="questionsControl2">
+
+      
       <div className="questionsControlSortBy">
+      
         <button className={(SortBy === "activity" ? "active" : "")} onClick={() => setSortBy("activity")}>
           activity
       </button>
@@ -84,6 +100,9 @@ function Questions(props) {
         <button className={(SortBy === "creation" ? "active" : "")} onClick={() => setSortBy("creation")}>
           creation
       </button>
+      <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
+        </button>
       </div>
     </div>
     <div className="questionsQuestions">
@@ -162,6 +181,7 @@ function QuestionBody(props) {
     <div className="QuestionCompnentBody">
       <div className="QuestionComponentBodyTitle" dangerouslySetInnerHTML={{ __html: props.Question.title }}></div>
       <div className="QuestionComponentBodyMeta">
+        
         <div className="QuestionMetaElement">
           <span>
             Created
@@ -191,13 +211,13 @@ function QuestionBody(props) {
       </div>
       <div className="QuestionComponentBodyExact">
         <div className="QuestionCompnentVoteControl">
-          <button onClick={() => props.upVote()}>
+          <button className={props?.Question?.upvoted ? "upvoted" : ""} onClick={props?.Question?.upvoted ? () => props.upVoteUndo() : () => props.upVote()} >
             up
           </button>
           <div>
             {props?.Question?.score}
           </div>
-          <button onClick={() => props.downVote()}>
+          <button className={props?.Question?.downvoted ? "downvoted" : ""} onClick={props?.Question?.downvoted ? () => props.downVoteUndo() : () => props.downVote()}>
             down
           </button>
         </div>
@@ -250,14 +270,24 @@ function Answers(props) {
   const [SortBy, setSortBy] = useState("votes")
   const [SortOrder, setSortOrder] = useState("desc")
   const userSignin = useSelector(state => state.userSignin);
+  const [Action, setAction] = useState(0)
   const userInfo = userSignin;
   const dispatch = useDispatch()
   useEffect(() => {
-    props.Question.question_id &&
+    if(userInfo.userInfo)
+    {
+      props.Question.question_id &&
+      axios.get(`/2.2/questions/${props.Question.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!*LTEvoJavPzEn_qf&key=`+ app_key + "&access_token=" + userInfo.userInfo
+      ).then((data) => {
+        setAnswers([...data.data.items]);
+      })
+    }
+    else
+    {props.Question.question_id &&
     axios.get(`/2.2/questions/${props.Question.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!LYA)Nz3qbZrw6sTybH(sU7`).then((data) => {
       setAnswers([...data.data.items]);
-    })
-  }, [SortBy,SortOrder,props.Question.question_id,window.location.href])
+    })}
+  }, [SortBy,SortOrder,props.Question.question_id,window.location.href,Action])
 
   const do_login = () => {
     window.SE.authenticate({
@@ -268,37 +298,89 @@ function Answers(props) {
       error: function (data) {
         alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage);
       },
-      scope: ['write_access', 'private_info', 'read_inbox'],
+      scope: ['write_access', 'private_info'],
       networkUsers: true
     })
   }
-
+  
+  
   const upVote = (answearid) => {
+    const formData = new FormData();
     if (!userInfo.userInfo) {
       do_login()
       return;
     }
-    axios.post(`/2.2/answers/${answearid}/upvote`, {
-      body: {
-        key: app_key,
-        access_token: userInfo.userInfo,
-        site: "stackoverflow"
-      }
-    }).then(resp => resp.text()).then(console.log);
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+    
+    
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/answers/${answearid}/upvote`,
+      data: formData,
+    }).then(resp => setAction(Action + 1));
+  }
+  const upVoteUndo = (answearid) => {
+    const formData = new FormData();
+    if (!userInfo.userInfo) {
+      do_login()
+      return;
+    }
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+    
+    
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/answers/${answearid}/upvote/undo`,
+      data: formData,
+    }).then(resp => setAction(Action + 1));
   }
   const downVote = (answearid) => {
+    const formData = new FormData();
     if (!userInfo.userInfo) {
       do_login()
       return;
     }
-    axios.post(`/2.2/answers/${answearid}/downvote`, {
-      body: {
-        key: app_key,
-        access_token: userInfo.userInfo,
-        site: "stackoverflow"
-      }
-    }).then(resp => resp.text()).then(console.log);
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+    
+    
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/answers/${answearid}/downvote`,
+      data: formData,
+    }).then(resp => setAction(Action + 1));
   }
+  const downVoteUndo = (answearid) => {
+    const formData = new FormData();
+    if (!userInfo.userInfo) {
+      do_login()
+      return;
+    }
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+    
+    
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/answers/${answearid}/downvote/undo`,
+      data: formData,
+    }).then(resp => setAction(Action + 1));
+  }
+
 
   return(<div className="QuestionPageAnswers">
     <div className="QuestionPageAnswersHeader">
@@ -324,12 +406,51 @@ function Answers(props) {
       </div>
     </div>
     <div className="QuestionPageAnswearsExact">
+      {console.log(Answers)}
       {Answers.map((answear, index) => 
       <div className="AnswearFromQuestion" key={index+ Math.random()}>
         <div className="AnswearFromQuestionControl">
-          {/* <button onClick={}>
-
-          </button> */}
+          <button className={answear.upvoted ? "upvoted" : ""} onClick={answear.upvoted ?() => upVoteUndo(answear.answer_id): () => upVote(answear.answer_id)}>
+            up
+          </button> 
+          <div className={answear.is_accepted ? "accepted" : ""}>
+            {answear.score}
+            </div>
+            <button className={answear.upvoted ? "upvoted" : ""} onClick={answear.upvoted ?() => downVoteUndo(answear.answer_id): () => downVote(answear.answer_id)}>
+            down
+          </button> 
+        </div>
+        <div className="AnswearBody">
+      
+          <div className="QuestionCompnentBody">
+          <div className="QuestionCompnentBodyExact" dangerouslySetInnerHTML={{ __html: answear?.body }}/>
+          <div>
+            <div>
+              <img src={answear?.owner?.profile_image}/>
+              <div>
+              <Link to={"/users/" + answear?.owner?.user_id} dangerouslySetInnerHTML={{ __html:answear?.owner?.display_name}}>
+              </Link>
+              <div>
+              {answear?.owner?.reputation}
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="comments">
+          {answear?.comments?.map((question, index) => <div key={index+ Math.random()}>
+            <div className="comment-body" dangerouslySetInnerHTML={{ __html:question.body}}>
+            </div>
+            <div className="comment-meta">
+              <Link className="comment-meta_User" to={"/users/" + question.owner.user_id}>
+                  {question.owner.display_name}
+              </Link>
+              <div className="comment-meta_Date">
+                  {timeConverter(question.creation_date)}
+              </div>
+            </div>
+          </div>)}
+        </div>
         </div>
       </div>
       )}
@@ -347,7 +468,6 @@ function Question(props) {
   const [userAccount, setuserAccount] = useState([])
   const [IsSetLike,setIsSetLike] = useState(false)
   const dispatch = useDispatch();
-
   const do_login = () => {
     window.SE.authenticate({
       success: function (data) {
@@ -357,7 +477,7 @@ function Question(props) {
       error: function (data) {
         alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage);
       },
-      scope: ['write_access', 'private_info', 'read_inbox'],
+      scope: ['write_access', 'private_info'],
       networkUsers: true
     })
   }
@@ -379,20 +499,64 @@ function Question(props) {
       headers: {'Content-Type': 'multipart/form-data'},
       url: `https://api.stackexchange.com/2.2/questions/${questionId}/upvote`,
       data: formData,
-    }).then(resp => {setQuestion(resp.data.items[0]);console.log(resp.data.items[0])});
+    }).then(resp => {setQuestion(resp.data.items[0])});
+  }
+  const upVoteUndo = () => {
+    const formData = new FormData();
+    if (!userInfo.userInfo) {
+      do_login()
+      return;
+    }
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+	
+    
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/questions/${questionId}/upvote/undo`,
+      data: formData,
+    }).then(resp => {setQuestion(resp.data.items[0])});
   }
   const downVote = () => {
     if (!userInfo.userInfo) {
       do_login()
       return;
     }
-    axios.post(`/2.2/questions/${questionId}/downvote`, {
-      body: {
-        key: app_key,
-        access_token: userInfo.userInfo,
-        site: "stackoverflow"
-      }
-    }).then(resp => resp.text()).then(console.log);
+    const formData = new FormData();
+
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+	
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/questions/${questionId}/downvote`,
+      data: formData,
+    }).then(resp => {setQuestion(resp.data.items[0])});
+  }
+  const downVoteUndo = () => {
+    if (!userInfo.userInfo) {
+      do_login()
+      return;
+    }
+    const formData = new FormData();
+
+    formData.append("key", app_key);
+    formData.append("access_token", userInfo.userInfo);
+    formData.append("site", "stackoverflow");
+    formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
+	
+    axios({
+      method: 'POST',
+      headers: {'Content-Type': 'multipart/form-data'},
+      url: `https://api.stackexchange.com/2.2/questions/${questionId}/downvote/undo`,
+      data: formData,
+    }).then(resp => {setQuestion(resp.data.items[0])});
   }
   useEffect(() => {
 
@@ -416,7 +580,7 @@ function Question(props) {
     })
   }, [window.location.href])
   return (<div className="QuestionComponent">
-    <QuestionBody Comments={Comments} downVote={downVote} upVote={upVote} Question={Question} />
+    <QuestionBody Comments={Comments} downVote={downVote} upVote={upVote} upVoteUndo={upVoteUndo} downVoteUndo={downVoteUndo} Question={Question} />
     <Answers Question={Question}/>
   </div>)
 }
@@ -429,7 +593,7 @@ function Tag({ tag, id }) {
   const [Wiki, setWiki] = useState(" ");
   useEffect(() => {
     axios.get(decodecsharp(`/2.2/tags/${tag.name}/wikis?site=stackoverflow`)).then((data) => {
-      setWiki(data.data.items[0].excerpt)
+      setWiki(data?.data?.items[0]?.excerpt)
     })
   }, [tag])
 
@@ -454,7 +618,7 @@ function Tags(props) {
 
   useEffect(() => {
 
-    axios.get(`/2.2/tags?page=${Page}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
+    axios.get(`/2.2/tags?page=${Page}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow${TagSearch ? `&inname=${TagSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...data.data.items]);
       setPage(1)
@@ -462,7 +626,7 @@ function Tags(props) {
     })
   }, [SortOrder, SortBy, TagSearch])
   const setMoreQuestions = () => {
-    axios.get(`/2.2/tags?page=${Page + 1}&pagesize=2&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
+    axios.get(`/2.2/tags?page=${Page + 1}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow`).then((data) => {
       setHasMore(data.data.has_more);
       setTags([...Tags, ...data.data.items]);
       setPage(Page + 1);
@@ -473,21 +637,20 @@ function Tags(props) {
   return (<div className="questionsComponent">
     <div className="questionsControl">
       <input value={TagSearch} onChange={(e) => setTagSearch(e.target.value)}></input>
-      <div className="questionsControlOrder">
-        <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
-          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
-        </button>
-      </div>
       <div className="questionsControlSortBy">
-        <button className={(SortBy === "popular " ? " active" : "")} onClick={() => setSortBy("popular")}>
+        
+        <button className={(SortBy === "popular" ? " active" : "")} onClick={() => setSortBy("popular")}>
           popular
       </button>
-        <button className={(SortBy === "activity " ? " active" : "")} onClick={() => setSortBy("activity")}>
+        <button className={(SortBy === "activity" ? " active" : "")} onClick={() => setSortBy("activity")}>
           activity
       </button>
-        <button className={(SortBy === "name " ? " active" : "")} onClick={() => setSortBy("name")}>
+        <button className={(SortBy === "name" ? " active" : "")} onClick={() => setSortBy("name")}>
           creation
       </button>
+      <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
+        </button>
       </div>
     </div>
 
@@ -818,7 +981,7 @@ class App extends React.Component {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'http://08b58107f5dd.ngrok.io',
+      channelUrl: 'http://5291f50a8e62.ngrok.io',
       complete: function (data) {
         // console.log(data) 
       }
@@ -896,19 +1059,21 @@ function Users(props) {
   const [Page, setPage] = useState(1)
   const [SortOrder, setSortOrder] = useState("desc")
   const [HasMore, setHasMore] = useState(false)
+  const [NameForSearch, setNameForSearch] = useState("")
+  const [formS, setformS] =useState(0)
   let id_for_scroll = "l" + (Users.length - 1);
 
   useEffect(() => {
 
-    axios.get(`/2.2/users?page=${Page}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    axios.get(`/2.2/users?page=${Page}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb${NameForSearch ? `&inname=${NameForSearch}` : ""}`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...data.data.items]);
       setPage(1)
       id_for_scroll = "l" + (Users.length - 1);
     })
-  }, [SortOrder, SortBy])
+  }, [SortOrder, SortBy,formS])
   const setMoreQuestions = () => {
-    axios.get(`/2.2/users?page=${Page + 1}&pagesize=3&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
+    axios.get(`/2.2/users?page=${Page + 1}&pagesize=40&order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!b6Aub2or8vkePb`).then((data) => {
       setHasMore(data.data.has_more);
       setUsers([...Users, ...data.data.items]);
       setPage(Page + 1);
@@ -916,15 +1081,19 @@ function Users(props) {
     })
   }
 
-
+  const searchName = (e) => {
+    e.preventDefault()
+    setformS(formS+1)
+  }
   return (
     <div className="UsersComponent">
       <div className="questionsControl">
-        <div className="questionsControlOrder">
-          <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
-            {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
-          </button>
-        </div>
+        <form onSubmit={(e) => searchName(e)}>  
+        <input value={NameForSearch} onChange={(e) => setNameForSearch(e.target.value)}/>
+        <button className="btn btn-warning "> Search</button>
+        </form>
+       
+        
         <div className="questionsControlSortBy">
           <button className={(SortBy === "reputation" ? "active" : "")} onClick={() => setSortBy("reputation")}>
             popular
@@ -934,6 +1103,9 @@ function Users(props) {
           </button>
           <button className={(SortBy === "name" ? "active" : "")} onClick={() => setSortBy("name")}>
             name
+          </button>
+          <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+            {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
           </button>
         </div>
       </div>
@@ -947,7 +1119,7 @@ function Users(props) {
         }
       </div>
       {HasMore ?
-        <a href={"#" + id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
+        <a href={"#" + id_for_scroll} onClick={() => setMoreQuestions()} className="btn btn-primary LoadMoreBtn">
           Load More
   </a> : ""
       }
@@ -985,6 +1157,8 @@ function Navbar(props) {
 
   const searchOnSite = (e) => {
     e.preventDefault();
+    window.location = `/questions?intitle=${InputSeach}`
+    setInputSeach("")
   }
 
   useEffect(() => {
@@ -1004,7 +1178,7 @@ function Navbar(props) {
       error: function (data) {
         alert('An error occurred:\n' + data.errorName + '\n' + data.errorMessage);
       },
-      scope: ['write_access', 'private_info', 'read_inbox'],
+      scope: ['write_access', 'private_info'],
       networkUsers: true
     })
   }
