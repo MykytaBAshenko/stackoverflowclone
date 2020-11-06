@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/stackoverflowclone/static/css/main.73ab90e1.chunk.css",
+    "main.js": "/stackoverflowclone/static/js/main.39443d2c.chunk.js",
+    "main.js.map": "/stackoverflowclone/static/js/main.39443d2c.chunk.js.map",
+    "runtime-main.js": "/stackoverflowclone/static/js/runtime-main.c944343a.js",
+    "runtime-main.js.map": "/stackoverflowclone/static/js/runtime-main.c944343a.js.map",
+    "static/js/2.f40bae45.chunk.js": "/stackoverflowclone/static/js/2.f40bae45.chunk.js",
+    "static/js/2.f40bae45.chunk.js.map": "/stackoverflowclone/static/js/2.f40bae45.chunk.js.map",
+    "index.html": "/stackoverflowclone/index.html",
+    "precache-manifest.b423528544fbcfaa65077c38975cbc77.js": "/stackoverflowclone/precache-manifest.b423528544fbcfaa65077c38975cbc77.js",
+    "service-worker.js": "/stackoverflowclone/service-worker.js",
+    "static/css/main.73ab90e1.chunk.css.map": "/stackoverflowclone/static/css/main.73ab90e1.chunk.css.map",
+    "static/js/2.f40bae45.chunk.js.LICENSE.txt": "/stackoverflowclone/static/js/2.f40bae45.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c944343a.js",
+    "static/js/2.f40bae45.chunk.js",
+    "static/css/main.73ab90e1.chunk.css",
+    "static/js/main.39443d2c.chunk.js"
+  ]
+}
