@@ -981,7 +981,7 @@ class App extends React.Component {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'http://5291f50a8e62.ngrok.io',
+      channelUrl: 'http://4c331962338a.ngrok.io',
       complete: function (data) {
         // console.log(data) 
       }
