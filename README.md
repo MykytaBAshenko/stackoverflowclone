@@ -6,7 +6,7 @@ Stackowerflow API https://api.stackexchange.com/docs
 
 Run on https://mykytabashenko.github.io/stackoverflowclone/
 
-### Technologies used in this client FE APP:
+### Technologies used in this FE APP:
     "axios": "^0.20.0",
     "js-cookie": "^2.2.1",
     "react": "^16.13.1",
