@@ -1245,7 +1245,7 @@ ReactDOM.render(
     store={createStore(reducer, initialState, composeEnhancer(applyMiddleware(thunk)))}
   >
     <React.StrictMode>
-      <BrowserRouter>
+      <BrowserRouter basename="/stackoverflowclone">
         <Switch>
           <Route path="/" component={App} />
         </Switch>
