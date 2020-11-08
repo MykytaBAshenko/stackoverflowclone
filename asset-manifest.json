@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/stackoverflowclone/static/css/main.73ab90e1.chunk.css",
-    "main.js": "/stackoverflowclone/static/js/main.61d2584e.chunk.js",
-    "main.js.map": "/stackoverflowclone/static/js/main.61d2584e.chunk.js.map",
+    "main.css": "/stackoverflowclone/static/css/main.87b243fd.chunk.css",
+    "main.js": "/stackoverflowclone/static/js/main.70e3bc48.chunk.js",
+    "main.js.map": "/stackoverflowclone/static/js/main.70e3bc48.chunk.js.map",
     "runtime-main.js": "/stackoverflowclone/static/js/runtime-main.c944343a.js",
     "runtime-main.js.map": "/stackoverflowclone/static/js/runtime-main.c944343a.js.map",
     "static/js/2.f40bae45.chunk.js": "/stackoverflowclone/static/js/2.f40bae45.chunk.js",
     "static/js/2.f40bae45.chunk.js.map": "/stackoverflowclone/static/js/2.f40bae45.chunk.js.map",
     "index.html": "/stackoverflowclone/index.html",
-    "precache-manifest.fd2b8a58dadd93cc163fb9382fc15ce4.js": "/stackoverflowclone/precache-manifest.fd2b8a58dadd93cc163fb9382fc15ce4.js",
+    "precache-manifest.3404ea268852d44cd1d40dd274a50a81.js": "/stackoverflowclone/precache-manifest.3404ea268852d44cd1d40dd274a50a81.js",
     "service-worker.js": "/stackoverflowclone/service-worker.js",
-    "static/css/main.73ab90e1.chunk.css.map": "/stackoverflowclone/static/css/main.73ab90e1.chunk.css.map",
+    "static/css/main.87b243fd.chunk.css.map": "/stackoverflowclone/static/css/main.87b243fd.chunk.css.map",
     "static/js/2.f40bae45.chunk.js.LICENSE.txt": "/stackoverflowclone/static/js/2.f40bae45.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.c944343a.js",
     "static/js/2.f40bae45.chunk.js",
-    "static/css/main.73ab90e1.chunk.css",
-    "static/js/main.61d2584e.chunk.js"
+    "static/css/main.87b243fd.chunk.css",
+    "static/js/main.70e3bc48.chunk.js"
   ]
 }
