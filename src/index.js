@@ -278,9 +278,10 @@ function Answers(props) {
   const [SortOrder, setSortOrder] = useState("desc")
   const userSignin = useSelector(state => state.userSignin);
   const [Action, setAction] = useState(0)
+
   const userInfo = userSignin;
   const dispatch = useDispatch()
-  useEffect(() => {
+  const getAnsearsF = () => {
     if(userInfo.userInfo)
     {
       props?.Question?.question_id &&
@@ -294,7 +295,11 @@ function Answers(props) {
     axios.get(`/2.2/questions/${props?.Question?.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!LYA)Nz3qbZrw6sTybH(sU7`).then((data) => {
       setAnswers([...data.data.items]);
     })}
-  }, [SortBy,SortOrder,props?.Question?.question_id,window.location.href,Action])
+  }
+  useEffect(() => {
+    getAnsearsF();
+
+  }, [SortBy,SortOrder,props?.Question?.question_id,window.location.href,Action,Answers[0]?.upvoted,Answers[0]?.downvoted])
 
   const do_login = () => {
     window.SE.authenticate({
@@ -321,14 +326,14 @@ function Answers(props) {
     formData.append("access_token", userInfo.userInfo);
     formData.append("site", "stackoverflow");
     formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
-    
+    setAction(Action + 1)
     
     axios({
       method: 'POST',
       headers: {'Content-Type': 'multipart/form-data'},
       url: `https://api.stackexchange.com/2.2/answers/${answearid}/upvote`,
       data: formData,
-    }).then(resp => setAction(Action + 1));
+    }).then((res) =>{ setAction(Action + 1); getAnsearsF();});
   }
   const upVoteUndo = (answearid) => {
     const formData = new FormData();
@@ -340,14 +345,14 @@ function Answers(props) {
     formData.append("access_token", userInfo.userInfo);
     formData.append("site", "stackoverflow");
     formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
-    
+    setAction(Action + 1)
     
     axios({
       method: 'POST',
       headers: {'Content-Type': 'multipart/form-data'},
       url: `https://api.stackexchange.com/2.2/answers/${answearid}/upvote/undo`,
       data: formData,
-    }).then(resp => setAction(Action + 1));
+    }).then((res) =>{ setAction(Action + 1); getAnsearsF();});
   }
   const downVote = (answearid) => {
     const formData = new FormData();
@@ -359,14 +364,15 @@ function Answers(props) {
     formData.append("access_token", userInfo.userInfo);
     formData.append("site", "stackoverflow");
     formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
-    
+    setAction(Action + 1)
     
     axios({
       method: 'POST',
       headers: {'Content-Type': 'multipart/form-data'},
       url: `https://api.stackexchange.com/2.2/answers/${answearid}/downvote`,
       data: formData,
-    }).then(resp => setAction(Action + 1));
+    }).then((res) =>{ setAction(Action + 1); getAnsearsF();}
+    );
   }
   const downVoteUndo = (answearid) => {
     const formData = new FormData();
@@ -379,27 +385,23 @@ function Answers(props) {
     formData.append("site", "stackoverflow");
     formData.append("filter", "!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k");
     
-    
+    setAction(Action + 1)
     axios({
       method: 'POST',
       headers: {'Content-Type': 'multipart/form-data'},
       url: `https://api.stackexchange.com/2.2/answers/${answearid}/downvote/undo`,
       data: formData,
-    }).then(resp => setAction(Action + 1));
+    }).then((res) =>{ setAction(Action + 1); getAnsearsF();});
   }
 
 
   return(<div className="QuestionPageAnswers">
     <div className="QuestionPageAnswersHeader">
-      <div>
+      <div className="QuestionPageAnswersHeaderTitle">
         <span>Answers</span> 
         <span> {Answers.length}</span>
       </div>
-      <div className="questionsControlOrder">
-        <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
-          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
-        </button>
-      </div>
+     
       <div className="questionsControlSortBy">
         <button className={(SortBy === "popular " ? " active" : "")} onClick={() => setSortBy("votes")}>
           votes
@@ -410,31 +412,37 @@ function Answers(props) {
         <button className={(SortBy === "name " ? " active" : "")} onClick={() => setSortBy("creation")}>
           creation
       </button>
+      <button onClick={() => SortOrder === "desc" ? setSortOrder("asc") : setSortOrder("desc")} className="questionsControlOrderBtn">
+          {SortOrder === "desc" ? <i className="fas fa-angle-double-down"></i> : <i className="fas fa-angle-double-up"></i>}
+        </button>
       </div>
     </div>
     <div className="QuestionPageAnswearsExact">
-      {console.log(Answers)}
       {Answers.map((answear, index) => 
-      <div id={"answer-" + answear.answer_id} className="AnswearFromQuestion" key={index+ Math.random()}>
-        <div className="AnswearFromQuestionControl">
-          <button className={answear.upvoted ? "upvoted" : ""} onClick={answear.upvoted ?() => upVoteUndo(answear.answer_id): () => upVote(answear.answer_id)}>
-            up
-          </button> 
-          <div className={answear.is_accepted ? "accepted" : ""}>
-            {answear.score}
-            </div>
-            <button className={answear.upvoted ? "upvoted" : ""} onClick={answear.upvoted ?() => downVoteUndo(answear.answer_id): () => downVote(answear.answer_id)}>
-            down
-          </button> 
-        </div>
+      <div id={"answer-" + answear.answer_id} className={"AnswearFromQuestion " + "asd"+Action}  key={index+ Math.random()}>
+       
         <div className="AnswearBody">
+        <div className="QuestionCompnentVoteControl">
+          <div className={"arrow-up " + (answear.upvoted ? "upvoted" : "")} onClick={answear.upvoted ?() => upVoteUndo(answear.answer_id): () => upVote(answear.answer_id)}>
+          </div>
+          <div className={"vote_control "+(answear.is_accepted ? "answered" : "")}>
+            {answear?.score}
+          </div>
+          <div className={"arrow-down " + (answear.downvoted ? "upvoted" : "")} onClick={answear.upvoted ?() => downVoteUndo(answear.answer_id): () => downVote(answear.answer_id)}>
+          </div>
+        </div>
+        <div className="QuestionCompnentBodyExact" dangerouslySetInnerHTML={{ __html: answear?.body }}/>
+        </div>
+
+
+        
       
-          <div className="QuestionCompnentBody">
-          <div className="QuestionCompnentBodyExact" dangerouslySetInnerHTML={{ __html: answear?.body }}/>
-          <div>
-            <div>
+
+        <div className="QuestionMetaGrid">
+          
+            <div className="QuestionMetaGridInfo">
               <img src={answear?.owner?.profile_image}/>
-              <div>
+              <div className="QuestionMetaGridInfoBody">
               <Link to={"/users/" + answear?.owner?.user_id} dangerouslySetInnerHTML={{ __html:answear?.owner?.display_name}}>
               </Link>
               <div>
@@ -443,9 +451,10 @@ function Answers(props) {
               </div>
             </div>
           </div>
-        </div>
+        {answear?.comments?.length ?
         <div className="comments">
-          {answear?.comments?.map((question, index) => <div key={index+ Math.random()}>
+          <div className="comments_to_answear_title">Comments</div>
+          {answear?.comments?.map((question, index) => <div className="comment-from-answear" key={index+ Math.random()}>
             <div className="comment-body" dangerouslySetInnerHTML={{ __html:question.body}}>
             </div>
             <div className="comment-meta">
@@ -457,9 +466,9 @@ function Answers(props) {
               </div>
             </div>
           </div>)}
+        </div>:<></>}
         </div>
-        </div>
-      </div>
+
       )}
 
     </div>
@@ -1014,7 +1023,7 @@ class App extends React.Component {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'http://73b6318ff4ee.ngrok.io',
+      channelUrl: 'http://9c648a826436.ngrok.io',
       complete: function (data) {
         // console.log(data) 
       }
