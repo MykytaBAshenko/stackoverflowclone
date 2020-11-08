@@ -8,7 +8,7 @@ import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import promiseMiddleware from 'redux-promise';
 import thunk from 'redux-thunk';
 import Cookie from 'js-cookie';
-import { BrowserRouter, Route, Switch, Link } from "react-router-dom"
+import { HashRouter, Route, Switch, Link } from "react-router-dom"
 // Id 18924
 // Client Secret jc3oSbdguMBJ7MwimeH8kA((
 // key 6)zESuXpc55o6lZ3o4psDQ((
@@ -1288,11 +1288,11 @@ ReactDOM.render(
   >
     <React.StrictMode>
       {/* basename="/stackoverflowclone" */}
-      <BrowserRouter >
+      <HashRouter >
         <Switch>
           <Route path="/" component={App} />
         </Switch>
-      </BrowserRouter>
+      </HashRouter>
     </React.StrictMode>
   </Provider>,
   document.getElementById('root')
