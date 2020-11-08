@@ -15,6 +15,7 @@ import { BrowserRouter, Route, Switch, Link } from "react-router-dom"
 axios.defaults.baseURL = "https://api.stackexchange.com"
 // 14464780
 // VhJOwhDs5V3zDbixqZwT7A))
+// "homepage": "https://mykytabashenko.github.io/stackoverflowclone/",
 function timeConverter(UNIX_timestamp) {
   var a = new Date(UNIX_timestamp * 1000);
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -32,7 +33,7 @@ function timeConverter(UNIX_timestamp) {
 
 function Question_about(props) {
   return (
-    <div className="QuestionAbout" dangerouslySetInnerHTML={{ __html: props.question.body }}>
+    <div className="QuestionAbout" dangerouslySetInnerHTML={{ __html: props?.question?.body }}>
 
     </div>
   )
@@ -67,7 +68,7 @@ function Questions(props) {
       setPage(1)
       id_for_scroll = "l" + (Questions.length - 1);
     })
-  }, [SortOrder, SortBy])
+  }, [SortOrder, SortBy, window.location.href])
   const setMoreQuestions = () => {
     if(inTitle) {
       axios.get(`/2.2/search?page=${Page + 1}&pagesize=50&order=${SortOrder}&intitle=${inTitle}&sort=${SortBy}&filter=!9_bDDx5Ia&site=stackoverflow${tagForSearch ? `&tagged=${tagForSearch}` : ""}`).then((data) => {
@@ -162,7 +163,7 @@ function Questions(props) {
       )}
     </div>
     {HasMore ?
-      <a href={"#" + id_for_scroll} onClick={() => setMoreQuestions()} className="LoadMoreBtn">
+      <a href={"#" + id_for_scroll} onClick={() => setMoreQuestions()} className="btn btn-primary LoadMoreBtn">
         Load More
   </a> : ""
     }
@@ -178,65 +179,64 @@ function QuestionBody(props) {
   }
   
   return (
-    <div className="QuestionCompnentBody">
-      <div className="QuestionComponentBodyTitle" dangerouslySetInnerHTML={{ __html: props.Question.title }}></div>
+    <div className="QuestionComponentBody">
+      <div className="QuestionComponentBodyTitle" dangerouslySetInnerHTML={{ __html: props?.Question?.title }}></div>
       <div className="QuestionComponentBodyMeta">
         
         <div className="QuestionMetaElement">
           <span>
-            Created
-          </span>
+            Created: 
+          </span> 
           <span>
-            {timeConverter(props.Question.creation_date)}
+            {" "+timeConverter(props?.Question?.creation_date)}
           </span>
         </div>
         {props?.Question?.last_edit_date &&
           <div className="QuestionMetaElement">
             <span>
-              Edited
-          </span>
+              Edited: 
+          </span> 
             <span>
-              {timeConverter(props?.Question?.last_edit_date)}
+              {" "+timeConverter(props?.Question?.last_edit_date)}
             </span>
           </div>
         }
         <div className="QuestionMetaElement">
           <span>
-            Viewed:
+            Viewed: 
           </span>
           <span>
-            {props?.Question?.view_count}
+            {" "+props?.Question?.view_count}
           </span>
         </div>
       </div>
       <div className="QuestionComponentBodyExact">
+      <div className="QuestionCompnentBody">
+        <div className="QuestionCompnentGrid">
         <div className="QuestionCompnentVoteControl">
-          <button className={props?.Question?.upvoted ? "upvoted" : ""} onClick={props?.Question?.upvoted ? () => props.upVoteUndo() : () => props.upVote()} >
-            up
-          </button>
-          <div>
+          <div className={"arrow-up " + (props?.Question?.upvoted ? "upvoted" : "")} onClick={props?.Question?.upvoted ? () => props.upVoteUndo() : () => props.upVote()} >
+          </div>
+          <div className={"vote_control "+(props?.Question?.is_answered ? "answered" : "")}>
             {props?.Question?.score}
           </div>
-          <button className={props?.Question?.downvoted ? "downvoted" : ""} onClick={props?.Question?.downvoted ? () => props.downVoteUndo() : () => props.downVote()}>
-            down
-          </button>
+          <div className={"arrow-down " + (props?.Question?.downvoted ? "upvoted" : "")} onClick={props?.Question?.downvoted ? () => props.downVoteUndo() : () => props.downVote()}>
+          </div>
         </div>
-        <div className="QuestionCompnentBody">
-          <div className="QuestionCompnentBodyExact" dangerouslySetInnerHTML={{ __html: props?.Question?.body }}/>
-          <ul>
+        <div className="QuestionCompnentBodyExact" dangerouslySetInnerHTML={{ __html: props?.Question?.body }}/>
+        </div>
+          
+          <ul className="tags_of_question">
             {
               props?.Question?.tags?.map((tag,index) => 
                 <li key={index+Math.random()} dangerouslySetInnerHTML={{ __html:tag}}></li>
               )
             }
           </ul>
-          <div>
-          {props?.Question?.is_answered&& props?.Question?.answers?.find(isPrime)?.last_edit_date && <div>Answered <span>
-            {timeConverter(props?.Question?.answers?.find(isPrime)?.last_edit_date)}
-            </span></div>}
-            <div>
+          <div className="QuestionMetaGrid">
+          
+            <div className="QuestionMetaGridInfo">
               <img src={props?.Question?.owner?.profile_image}/>
-              <div>
+              <div className="QuestionMetaGridInfoBody">
               <Link to={"/users/" + props?.Question?.owner?.user_id} dangerouslySetInnerHTML={{ __html:props?.Question?.owner?.display_name}}>
               </Link>
               <div>
@@ -244,22 +244,29 @@ function QuestionBody(props) {
               </div>
               </div>
             </div>
+            {props?.Question?.is_answered&& props?.Question?.answers?.find(isPrime)?.last_edit_date && <div>Answered <span>
+            {timeConverter(props?.Question?.answers?.find(isPrime)?.last_edit_date)}
+            </span></div>}
           </div>
         </div>
+        {
+          props.Comments.length ?
         <div className="comments">
-    {props.Comments.map((question, index) => <div key={index+ Math.random()}>
+          <div className="QuestionCommentsTitle">Comments</div>
+    {props.Comments.map((question, index) => <div className="QuestionCommentsComment" key={index+ Math.random()}>
       <div className="comment-body" dangerouslySetInnerHTML={{ __html:question.body}}>
       </div>
       <div className="comment-meta">
-        <Link className="comment-meta_User" to={"/users/" + question.owner.user_id}>
-            {question.owner.display_name}
+        <Link className="comment-meta_User" to={"/users/" + question.owner.user_id} dangerouslySetInnerHTML={{ __html:question.owner.display_name}}>
+         
         </Link>
         <div className="comment-meta_Date">
             {timeConverter(question.creation_date)}
         </div>
       </div>
     </div>)}
-  </div>
+  </div> : <></>
+}
       </div>
     </div>
   )
@@ -276,18 +283,18 @@ function Answers(props) {
   useEffect(() => {
     if(userInfo.userInfo)
     {
-      props.Question.question_id &&
-      axios.get(`/2.2/questions/${props.Question.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!*LTEvoJavPzEn_qf&key=`+ app_key + "&access_token=" + userInfo.userInfo
+      props?.Question?.question_id &&
+      axios.get(`/2.2/questions/${props?.Question?.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!*LTEvoJavPzEn_qf&key=`+ app_key + "&access_token=" + userInfo.userInfo
       ).then((data) => {
         setAnswers([...data.data.items]);
       })
     }
     else
-    {props.Question.question_id &&
-    axios.get(`/2.2/questions/${props.Question.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!LYA)Nz3qbZrw6sTybH(sU7`).then((data) => {
+    {props?.Question?.question_id &&
+    axios.get(`/2.2/questions/${props?.Question?.question_id}/answers?order=${SortOrder}&sort=${SortBy}&site=stackoverflow&filter=!LYA)Nz3qbZrw6sTybH(sU7`).then((data) => {
       setAnswers([...data.data.items]);
     })}
-  }, [SortBy,SortOrder,props.Question.question_id,window.location.href,Action])
+  }, [SortBy,SortOrder,props?.Question?.question_id,window.location.href,Action])
 
   const do_login = () => {
     window.SE.authenticate({
@@ -408,7 +415,7 @@ function Answers(props) {
     <div className="QuestionPageAnswearsExact">
       {console.log(Answers)}
       {Answers.map((answear, index) => 
-      <div className="AnswearFromQuestion" key={index+ Math.random()}>
+      <div id={"answer-" + answear.answer_id} className="AnswearFromQuestion" key={index+ Math.random()}>
         <div className="AnswearFromQuestionControl">
           <button className={answear.upvoted ? "upvoted" : ""} onClick={answear.upvoted ?() => upVoteUndo(answear.answer_id): () => upVote(answear.answer_id)}>
             up
@@ -564,11 +571,14 @@ function Question(props) {
     axios.get(`/2.2/questions/${questionId}?order=desc&sort=activity&site=stackoverflow&filter=!BJfsBnB0faV0fF7rJfiBCdRE3ODZ_k&key=`+ app_key + "&access_token=" + userInfo.userInfo).then((data) => {
       setQuestion(data.data.items[0])
       console.log(data.data.items[0])
+      if(!data.data.items[0])
+      window.history.back(-1)
     })
     else
     axios.get(`/2.2/questions/${questionId}?order=desc&sort=activity&site=stackoverflow&filter=!gHxZH78yCuIaWIg7.*4vdWlEJvCPGislsl.`).then((data) => {
       setQuestion(data.data.items[0])
-      console.log(data.data.items[0])
+      if(!data.data.items[0])
+      window.history.back()
     })
     
   }, [window.location.href])
@@ -693,9 +703,13 @@ function PostComponent(props) {
 
   }, [thisGavno])
   return (<div className="PostFromUserPage">
-    <div className="PostFromUserPageType">{(thisGavno?.post_type) ? thisGavno?.post_type[0] : props.type[0]}</div>
-    <div className={"PostFromUserPageScore " + ((Post?.is_accepted) ? "accepted" : "")}>{thisGavno?.score}</div>
-    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id + ((thisGavno?.post_type === "answer" || props.type === "answers") ? "#answer-" + (Post?.answer_id) : "")}>{Post?.title}</Link>
+    {
+      (((thisGavno?.post_type) ? thisGavno?.post_type[0] : props.type[0]) != "f") ? 
+      <div className="PostFromUserPageType">{(thisGavno?.post_type) ? thisGavno?.post_type[0] : props.type[0]}</div> : 
+      <></> 
+    }
+    <div className={"PostFromUserPageScore " + ((Post?.is_accepted || Post?.is_answered) ? "accepted" : "")}>{thisGavno?.score}</div>
+    <Link className="PostFromUserPageLink" to={"/questions/" + Post?.question_id + ((thisGavno?.post_type === "answer" || props.type === "answers") ? "#answer-" + (Post?.answer_id) : "")} dangerouslySetInnerHTML={{ __html: Post?.title }}></Link>
     <div className="PostFromUserDate">{timeConverter(thisGavno?.creation_date)}</div>
   </div>)
 }
@@ -710,7 +724,7 @@ function UserPagePostsComponent(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-      axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+      axios.get(`/2.2/users/${user_id}/${PostsType}?page=${1}&pagesize=6&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
         setHasMore(data.data.has_more);
         setPosts([...data.data.items]);
         setPage(1)
@@ -719,7 +733,7 @@ function UserPagePostsComponent(props) {
 
 
   const setPagePost = (page) => {
-    axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=1&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
+    axios.get(`/2.2/users/${user_id}/${PostsType}?page=${page}&pagesize=6&order=desc&sort=${PostsSort}&site=stackoverflow&filter=!3zl2.9E7NQMVtI(Xo`).then((data) => {
       setPage(page);
       setPosts([...data.data.items]);
       setHasMore(data.data.has_more);
@@ -729,27 +743,28 @@ function UserPagePostsComponent(props) {
   return (
     ((Posts.length && PostsType === "posts") || PostsType !== "posts") &&
     <div className="PostsComponent">
+      <div className="PostsComponentTitle">User Posts</div>
       <div className="PostsFilters">
         <div className="PostsFiltersType">
-          <button onClick={() => setPostsType("posts")}>
+          <button className={PostsType === "posts" ? "active" : ""} onClick={() => setPostsType("posts")}>
             Q&A
           </button >
-          <button onClick={() => setPostsType("questions")}>
+          <button className={PostsType === "questions" ? "active" : ""} onClick={() => setPostsType("questions")}>
             Questions
           </button>
-          <button onClick={() => setPostsType("answers")}>
+          <button className={PostsType === "answers" ? "active" : ""} onClick={() => setPostsType("answers")}>
             Answers
           </button>
-          <button onClick={() => setPostsType("favorites")}>
+          <button className={PostsType === "favorites" ? "active" : ""} onClick={() => setPostsType("favorites")}>
             favorites
           </button>
 
         </div>
         <div className="PostsFiltersSort">
-          <button onClick={() => setPostsSort("votes")}>
+          <button className={PostsSort === "votes" ? "active" : ""} onClick={() => setPostsSort("votes")}>
             Votes
           </button>
-          <button onClick={() => setPostsSort("creation")}>
+          <button className={PostsSort === "creation" ? "active" : ""}  onClick={() => setPostsSort("creation")}>
             Newest
           </button>
 
@@ -761,17 +776,17 @@ function UserPagePostsComponent(props) {
       {((Page === 1 && HasMore && Posts.length) || (Page > 1)) &&
         <div className="UserPostsPageControl">
           {Page > 1 &&
-            <button onClick={() => setPagePost(Page - 1)}>
-              -1
-        </button>
+            <div className="arrow-left" onClick={() => setPagePost(Page - 1)}>
+              
+        </div>
           }
           <div className="PostsList">
             {Page}
           </div>
           {HasMore &&
-            <button onClick={() => setPagePost(Page + 1)}>
-              1
-        </button>
+            <div className="arrow-right"  onClick={() => setPagePost(Page + 1)}>
+           
+        </div>
           }
         </div>
       }
@@ -787,7 +802,7 @@ function TimeLineComponent(props) {
   const user_id = props.User.user_id
   useEffect(() => {
     user_id &&
-      axios.get(`/2.2/users/${user_id}/timeline?pagesize=40&page=${Page}&site=stackoverflow`).then(data => {
+      axios.get(`/2.2/users/${user_id}/timeline?pagesize=10&page=${Page}&site=stackoverflow`).then(data => {
         setTimeLine(data.data.items)
         setHasMore(data.data.has_more);
         console.log(data.data.items)
@@ -796,28 +811,39 @@ function TimeLineComponent(props) {
   return (
     TimeLine.length ?
       <div className="userPageTimeline">
-        <div >
+        <div className="userPageTimelineTitle">
           TimeLine
         </div>
         <div className="userPageTimelineExact">
           {TimeLine.map((time, index) => <div key={index + Math.random()} className="TimeLineComponent">
-            <div>{timeConverter(time.creation_date)}</div>
-            <div>{time.timeline_type}</div>
-            <Link to={"/questions/" + time.post_id}>{time.detail || time.title}</Link>
+            <div className="userPageTimelineType">{time.timeline_type}</div>{time.post_type === "answer" ?
+            <div className="TimeLineComponentText" dangerouslySetInnerHTML={{ __html: time.detail || time.title }}></div> :
+            <Link className="TimeLineComponentText" to={"/questions/" + time.post_id} dangerouslySetInnerHTML={{ __html: time.detail || time.title }}></Link>
+            }
+            <div className="userPageTimelineTime">{timeConverter(time.creation_date)}</div>
+
           </div>)}
         </div>
-        <div className="UserPageCommentsControl">{
-          Page > 1 &&
-          <button onClick={() => setPage(Page - 1)}> -1</button>
-        }
-          <div>{Page}</div>{HasMore &&
-            <button onClick={() => setPage(Page + 1)}>  1</button>
+        <div className="UserPostsPageControl">
+          {Page > 1 &&
+            <div className="arrow-left" onClick={() => setPage(Page - 1)}>
+              
+        </div>
+          }
+          <div className="PostsList">
+            {Page}
+          </div>
+          {HasMore &&
+            <div className="arrow-right"  onClick={() => setPage(Page + 1)}>
+           
+        </div>
           }
         </div>
       </div> : <></>
   )
 }
 
+      
 function UserPageComments(props) {
   const [Comments, setComments] = useState([])
   const [Page, setPage] = useState(1)
@@ -829,12 +855,13 @@ function UserPageComments(props) {
       axios.get(`/2.2/users/${user_id}/comments?order=desc&pagesize=4&page=${Page}&sort=creation&site=stackoverflow&filter=!--1nZxT0.tIV`).then(data => {
         setComments(data.data.items)
         setHasMore(data.data.has_more);
+        console.log(data.data.items)
       })
   }, [Page, user_id, window.location.href])
   return (
     Comments.length ?
       <div className="UserPageCommentsMap">
-        <div>
+        <div className="UserPageCommentsTitle">
           Comments
       </div>
         <div className="UserPageCommentsMapExact">
@@ -843,17 +870,18 @@ function UserPageComments(props) {
             <div>{timeConverter(comment.creation_date)}</div>
           </div>)}
         </div>
-        <div className="UserPageCommentsControl">{
+        <div className="UserPostsPageControl">{
           Page > 1 &&
-          <button onClick={() => setPage(Page - 1)}> -1</button>
+          <div className="arrow-left" onClick={() => setPage(Page - 1)}> </div>
         }
-          <div>{Page}</div>{HasMore &&
-            <button onClick={() => setPage(Page + 1)}>  1</button>
+          <div className="PostsList">{Page}</div>{HasMore &&
+            <div className="arrow-right" onClick={() => setPage(Page + 1)}> </div>
           }
         </div>
       </div> : <></>
   )
 }
+
 
 function User(props) {
   const [User, setUser] = useState([]);
@@ -899,12 +927,17 @@ function User(props) {
           </div>
         </div>
       </div>
+      { Tags.length ? 
+      <div className="tagsUserPage">
+        <div className="tagsUserPageTitle">User Tags</div>
       <ul className="Tags">
         {Tags.map((tag, index) => <li key={index + "" + tag.count}>
           <span className="userPageTagName">{tag.name}</span>
           <span className="userPageTagCount">{tag.count}</span>
         </li>)}
       </ul>
+      </div> : <></>
+}
       <div className="userPagePosts">
         <UserPagePostsComponent User={User} />
       </div>
@@ -912,18 +945,18 @@ function User(props) {
         <UserPageComments User={User} />
       </div>
       <div className="userPagePrivileges">
-        <div>
+        <div className="userPagePrivilegesTitle">
           Privileges
         </div>
-        <div className="userPagePrivilegesExact">
-          {Privileges.map((map, index) => <div className="Privilege" key={index * Math.random()}>
+        <ul className="Tags">
+          {Privileges.map((map, index) => <li className="Privilege" key={index * Math.random()}>
             {map.short_description}
-          </div>)}
-        </div>
+          </li>)}
+        </ul>
       </div>
       {Associated.length &&
         <div className="userPageAssociated">
-          <div className="">
+          <div className="userPageAssociatedTitle">
             Associated accounts
           </div>
           <div className="UsersMap">
@@ -959,7 +992,7 @@ function UserAssociated(props) {
         </Link>
         <div className="FirstInfoAbout">
           <Link to={"/users/" + user?.user_id} dangerouslySetInnerHTML={{ __html: user?.display_name }}></Link>
-          <div className="locationUserCell" dangerouslySetInnerHTML={{ __html: `<i class="fa fa-location"></i> ${user?.location}` }}></div>
+          <div className="locationUserCell" dangerouslySetInnerHTML={{ __html: user?.location ? `<i class="fa fa-location"></i> ${user?.location}` : "" }}></div>
           <div className="reputationUserCell">Reputation: {user?.reputation}</div>
 
         </div>
@@ -981,7 +1014,7 @@ class App extends React.Component {
     window.SE.init({
       clientId: 18924,
       key: '6)zESuXpc55o6lZ3o4psDQ((',
-      channelUrl: 'https://mykytabashenko.github.io/stackoverflowclone/',
+      channelUrl: 'http://73b6318ff4ee.ngrok.io',
       complete: function (data) {
         // console.log(data) 
       }
@@ -1245,7 +1278,8 @@ ReactDOM.render(
     store={createStore(reducer, initialState, composeEnhancer(applyMiddleware(thunk)))}
   >
     <React.StrictMode>
-      <BrowserRouter basename="/stackoverflowclone">
+      {/* basename="/stackoverflowclone" */}
+      <BrowserRouter >
         <Switch>
           <Route path="/" component={App} />
         </Switch>

@@ -4,6 +4,7 @@
   box-sizing: border-box;
   margin:0;
 outline: none !important;
+max-width: 100%;
 }
 
 .form-search-from-navbar{
@@ -68,9 +69,12 @@ width: 100%;
   color: #ffc107
 }
 .navbar-dark .navbar-nav .nav-link:hover{
-  color: #ffc107
+  color: #ff7707
 }
+.navbar-dark .navbar-nav .nav-link:focus{
+  color: #ffc107 
 
+}
 .navbar-avatar{
   display: grid;
   align-items: center;
@@ -348,9 +352,14 @@ ul.QuestionRowBodyTags li a{
   text-align: right;
 }
 
+/* .QuestionCompnentBodyExact *{
+  max-width: 68vw;
+  width: 100%;
+}
 
-
-
+.QuestionCompnentBodyExact pre{
+  max-width: 100%;
+} */
 
 
 
@@ -380,7 +389,7 @@ ul.QuestionRowBodyTags li a{
 }
 
 .UserCellShell{
-  background-color: #d8d8d8;
+  background-color: #cecece;
   height: 100%;
 }
 .FirstInfo{
@@ -513,4 +522,418 @@ ul.QuestionRowBodyTags li a{
   .TagsMap{
     padding: 0 10px;
   }
+  }
+
+  .userPage{
+    display: grid;
+    justify-items: center;
+  }
+  .userPageShell{
+    background-color: #e6e6e6;
+    display: grid;
+    max-width: 900px;
+    width: 100%;
+    justify-items: center;
+    padding: 15px;
+  }
+  .userPageHeader{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    column-gap: 15px;
+  }
+  .userPageImage{
+    display: grid;
+    justify-items: center;
+    grid-template-rows: auto auto 1fr;
+  }
+  .userPageImage img{
+    max-width: 100%;
+    border-radius: 5px;
+    width: 100%;
+  }
+  .tagsUserPage{
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .tagsUserPageTitle{
+    font-size: 2.2rem;
+    font-weight: 500;
+  }
+  @media screen and (max-width: 700px) {
+    .userPageHeader {
+     grid-template-columns: 1fr;
+    }
+    .userPageImage img{
+      max-width: 150px;
+      border-radius: 5px;
+      width: 100%;
+    }
+  }
+
+
+  .Tags{
+    display: flex;
+    flex-wrap: wrap;
+  justify-content: left;
+  margin-bottom: 0;
+  }
+  .Tags li{
+    margin: 2px;
+    padding: 2px;
+    background-color: #ffc107;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .userPageTagName{
+    padding: 2px;
+    font-size: 20px;
+  }
+  .userPageTagCount{
+    padding: 2px;
+    color: #303030;
+  }
+  .userPagePosts{
+    display: grid;
+    padding:15px 5px;
+    justify-items: center;
+    width: 100%;
+  }
+  .PostsComponent{
+    display: grid;
+    row-gap: 5px;
+    width: 100%;
+  }
+  .PostsFilters{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+  }
+  .PostsFiltersSort{
+    justify-self: end;
+  }
+  .PostsFilters div{
+    display: flex;
+    flex-wrap: wrap;
+
+  }
+  .PostsFilters div button{
+    background-color: #ffc107;
+    border-radius: 5px;
+    font-size: 16px;
+    padding: 5px 10px;
+    border: 0;margin: 3px;
+  }  
+
+  .PostsComponentTitle{
+    font-size: 2.2rem;
+    font-weight: 500;
+  }
+
+  .PostsFilters div button.active{
+    background-color: #ff9100;
+    
+  }  
+  .PostsFilters div button:hover{
+    background-color: #ff9100;
+  }  
+  @media screen and (max-width: 600px) {
+    .PostsFilters{
+      grid-template-columns: 1fr;
+    }
+    .PostsFiltersSort {
+      justify-self: start;
+  }
+  }
+  .UserPostsPageControl{
+    display: flex;
+    flex-wrap: wrap;align-items: center;
+    
+  }
+ 
+  .arrow-up {
+    width: 0; 
+    height: 0; 
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    cursor: pointer;
+    border-bottom: 25px solid rgb(117, 117, 117);
+  }
+  .arrow-up:hover {
+    border-bottom: 25px solid #ffc107;
+  }
+  .arrow-up.upvoted {
+    border-bottom: 25px solid #ffc107;
+    
+  }
+  .arrow-up.upvoted:hover {
+    border-bottom: 25px solid rgb(117, 117, 117);
+  }
+
+  .arrow-down {
+    width: 0; 
+    height: 0; 
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    cursor: pointer;
+    border-top: 25px solid rgb(117, 117, 117);
+  }
+  .arrow-down:hover {
+    border-top: 25px solid #ffc107;
+  }
+  .arrow-down.upvoted {
+    border-top: 25px solid #ffc107;
+    
+  }
+  .arrow-down.upvoted:hover {
+    border-top: 25px solid rgb(117, 117, 117);
+  }
+  
+  .QuestionCompnentVoteControl{
+    display: grid;
+    justify-items: center;
+    row-gap: 6px;
+    grid-template-rows: auto auto 1fr;
+  }
+  .arrow-right {
+    width: 0; 
+    height: 0; 
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    
+    border-left: 25px solid rgb(117, 117, 117);
+  }
+  
+  .arrow-left {
+    width: 0; 
+    height: 0; 
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    
+    border-right:25px solid rgb(117, 117, 117);
+  }
+  .arrow-left:hover {
+    cursor: pointer;
+    border-right:25px solid #ffc107;
+  }
+  .arrow-right:hover{
+    border-left:25px solid #ffc107;
+    cursor: pointer;
+
+  }
+  .PostsList{
+    font-size: 22px;
+    padding: 0 8px;
+  }
+  .PostFromUserDate{
+    width: 100%;
+  }
+  .PostFromUserPage{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .PostFromUserPageScore{
+    font-size: 20px;
+    margin: 4px;
+    padding: 5px 15px;
+    border-radius: 5px;
+  }
+  .PostFromUserPageScore.accepted{
+    background-color: #5eba7d;
+  }
+  .PostFromUserPageType{
+    text-transform:uppercase;
+    font-size: 20px;
+  }
+  .UserPostsExact{
+    background-color: #cecece;
+    padding: 9px 10px;
+    border-radius: 5px;
+    margin: 3px;
+  }
+  .PostFromUserPageLink{
+    width: 100%;
+  }
+  .UserPageCommentsTitle{
+    font-size: 2.3rem;
+  }
+  .UserPageCommentsMap{
+    width: 100%;
+  }
+
+  .userPageComments{
+    width: 100%;
+  }
+
+  .userPagePrivilegesTitle{
+    font-size: 2.3rem;
+    font-weight: 500;
+  }
+
+  .userPageAssociatedTitle{
+    font-size: 2.3rem;
+    font-weight: 500; 
+  }
+
+  .userPagePrivileges{
+    width: 100%;
+  }
+
+  ul li.Privilege{
+    padding: 4px 7px;
+  }
+  
+  @media screen and (max-width: 991px) {
+    .login{
+      margin-top: 10px;
+    }
+  }
+  .userPageAssociated{
+    width: 100%;
+  }
+  .userPageTimelineTitle{
+    font-size: 2.3rem;
+  }
+  .userPageTimeline{
+    width: 100%;
+  }
+
+  .userPageTimelineType{
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+
+  .userPageTimelineTime{
+    font-size: 13px;
+  }
+  .userPageShell{}
+  .TimeLineComponent{
+    background-color: #cecece;
+    padding: 5px;
+    overflow: auto;
+    max-width: 100%;
+
+    border-radius: 5px;
+    margin: 7px 0;
+  }
+
+  .TimeLineComponentText{
+    font-size: 14px;
+  }
+  .userPageTimelineExact{
+    max-width: 100%;
+  }
+  .userPageTimeline{
+    max-width: 100%;
+  }
+  .TimeLineComponentText{
+    overflow: auto;
+    max-width: 860px;
+  }
+
+  .QuestionComponent{
+    display: grid;
+    justify-items: center;
+  }
+
+  .QuestionComponentBody{
+    max-width: 900px;
+    background-color: #cecece;
+    padding: 10px;
+    
+  }
+
+  .QuestionComponentBodyTitle{
+    font-size: 1.7rem;
+  }
+  .QuestionComponentBodyMeta .QuestionMetaElement{
+      font-size: .85rem;
+
+  }
+  .QuestionComponentBodyMeta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .QuestionCompnentGrid{
+    display: grid;
+    column-gap: 10px;
+    padding: 12px 0 0;
+    max-width: 100%;
+    grid-template-columns: auto 1fr;
+  }
+
+  .QuestionCompnentVoteControl .answered {
+    background-color: #5eba7d;
+    color: white;
+    
+  }
+  .vote_control{
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .tags_of_question{
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .tags_of_question li{
+    padding: 4px 10px;
+    margin: 2px;
+    background-color: #f7aa06;
+    color: white;
+  }
+
+  ul li a{ 
+    color: white;
+  }
+  .QuestionCompnentBody{
+    max-width: 100%;
+  }
+  .QuestionCompnentBodyExact{
+    display: grid;
+    justify-items: left;
+   max-width: 800px;  
+   width: 100%;
+  }
+  .QuestionCompnentBodyExact img{
+    width: 100%;
+
+  }
+  .QuestionMetaGrid{
+    display: grid;
+    justify-items: end;
+  }
+  .QuestionMetaGridInfo {
+    background-color: #adadad;
+    padding: 6px;
+    border-radius: 0px;
+    display: grid;
+    grid-template-columns: 100px auto;
+  }
+  .QuestionMetaGridInfo img{
+    padding: 5px;
+    max-width: 100%;
+  }
+  .QuestionCommentsTitle{
+    font-size: 2.1rem;
+  }
+
+  .QuestionCommentsComment{
+    border-top:1px solid #696969;
+    padding-top: 5px;
+  }
+  .comment-body{
+    font-size: 14px;
+  }
+  .comment-meta_User{
+    font-size: 12px;
+  }
+  .comment-meta_Date{
+    font-size: 12px;
   }
